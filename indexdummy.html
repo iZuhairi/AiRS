@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AiRS - Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+</head>
+<body class="bg-[#f8fafc] text-slate-900 min-h-screen flex flex-col md:flex-row m-0 p-0 overflow-x-hidden">
+  <div id="sidebar-container"></div>
+
+  <main class="flex-1 min-w-0 w-full overflow-x-hidden p-4 md:p-8">
+    <div id="header-container"></div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      
+      <!-- ACTIVE INCIDENTS -->
+      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-slate-500">Active Incidents</p>
+          <h3 id="incidents-count" class="text-2xl font-bold text-slate-800">0</h3>
+        </div>
+        <div class="p-3 bg-rose-50 rounded-lg">
+          <svg class="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        </div>
+      </div>
+
+      <!-- DEVICES ONLINE WITH SCAN OPTION -->
+      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <p class="text-sm font-medium text-slate-500">Devices Online</p>
+            <span id="devices-total" class="text-xs font-semibold text-slate-400">(/0 Total)</span>
+          </div>
+          <h3 id="devices-count" class="text-2xl font-bold text-slate-800">0</h3>
+        </div>
+        
+        <!-- SCAN BUTTON -->
+        <button id="btn-scan-devices" onclick="runDeviceScan()" title="Ping registered devices now" class="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 font-semibold rounded-lg text-xs transition border border-blue-200 flex items-center gap-1.5">
+          <svg id="scan-spinner" class="w-3.5 h-3.5 hidden animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          <svg id="scan-icon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          <span id="scan-btn-text">Scan</span>
+        </button>
+      </div>
+
+      <!-- SYSTEM HEALTH -->
+      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-slate-500">System Health</p>
+          <h3 class="text-2xl font-bold text-emerald-600">Good</h3>
+        </div>
+        <div class="p-3 bg-emerald-50 rounded-lg">
+          <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- INCIDENTS TABLE CARD -->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="p-6 border-b border-slate-200">
+        <h2 class="text-lg font-bold text-slate-800">Active Port Security Violations</h2>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-50 text-slate-600 text-sm border-b border-slate-200">
+              <th class="p-4 font-semibold">Device IP</th>
+              <th class="p-4 font-semibold">Port</th>
+              <th class="p-4 font-semibold">MAC Address</th>
+              <th class="p-4 font-semibold">Status</th>
+              <th class="p-4 font-semibold">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="incidents-table-body" class="divide-y divide-slate-200 text-sm">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script src="assets/script.js"></script>
+  <script>
+    renderSidebar("dashboard");
+    renderHeader();
+
+    const userRole = localStorage.getItem("userRole") || "user";
+
+    // 🎯 LOAD DASHBOARD INCIDENTS & INITIAL DEVICES COUNT
+    async function loadDashboardData() {
+      try {
+        const [incidentsRes, devicesRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/incidents`),
+          fetch(`${API_BASE_URL}/devices`)
+        ]);
+
+        const incidents = await incidentsRes.json();
+        const devices = await devicesRes.json();
+
+        // Active Incidents Counter
+        const activeAlerts = incidents.filter(inc => inc.status === "Active");
+        document.getElementById("incidents-count").textContent = activeAlerts.length;
+
+        // Set initial registered devices total
+        if (Array.isArray(devices)) {
+          document.getElementById("devices-total").textContent = `(/${devices.length} Total)`;
+        }
+
+        // Populate Table
+        const tableBody = document.getElementById("incidents-table-body");
+        if (!tableBody) return;
+        tableBody.innerHTML = "";
+
+        if (activeAlerts.length === 0) {
+          tableBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400">No active incidents found.</td></tr>`;
+          return;
+        }
+
+        activeAlerts.forEach((inc) => {
+          const displayHost = inc.device_display_name || inc.device_ip;
+          const actionButton = userRole === "admin"
+            ? `<button onclick="triggerDashboardRemediation(event, ${inc.id}, '${inc.device_ip}', '${inc.port}')" class="px-3 py-1.5 bg-blue-600 text-white hover:bg-blue-700 rounded-lg text-xs font-semibold shadow-sm transition">Remediate</button>`
+            : `<span class="text-xs font-medium text-slate-400 italic">Read-Only</span>`;
+
+          tableBody.innerHTML += `
+            <tr class="hover:bg-slate-50/50">
+              <td class="p-4 font-medium text-slate-800">${displayHost}</td>
+              <td class="p-4 text-slate-600">${inc.port}</td>
+              <td class="p-4 text-slate-600 uppercase font-mono">${inc.mac_address}</td>
+              <td class="p-4">
+                <span class="px-2.5 py-1 bg-red-50 text-red-600 rounded-full text-xs font-semibold">Active</span>
+              </td>
+              <td class="p-4">
+                ${actionButton}
+              </td>
+            </tr>
+          `;
+        });
+      } catch (err) {
+        console.error("Error fetching data:", err);
+      }
+    }
+
+    // 📡 SCAN DEVICES FUNCTION (Pings devices concurrently via Backend API)
+    async function runDeviceScan() {
+      const btn = document.getElementById("btn-scan-devices");
+      const spinner = document.getElementById("scan-spinner");
+      const icon = document.getElementById("scan-icon");
+      const btnText = document.getElementById("scan-btn-text");
+      const countEl = document.getElementById("devices-count");
+
+      btn.disabled = true;
+      spinner.classList.remove("hidden");
+      icon.classList.add("hidden");
+      btnText.innerText = "Scanning...";
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/devices/scan`, { method: "POST" });
+        const data = await response.json();
+
+        if (response.ok) {
+          countEl.textContent = data.online;
+          document.getElementById("devices-total").textContent = `(/${data.total} Total)`;
+        } else {
+          alert(`[!] Scan Error: ${data.error || "Failed to complete device ping scan."}`);
+        }
+      } catch (err) {
+        console.error("Ping Scan Error:", err);
+        alert(`[!] Network Error: Unable to reach backend server.`);
+      } finally {
+        btn.disabled = false;
+        spinner.classList.add("hidden");
+        icon.classList.remove("hidden");
+        btnText.innerText = "Scan";
+      }
+    }
+
+    // ⚡ RECOVERY AUTOMATION DISPATCH FOR DASHBOARD VIEW
+    async function triggerDashboardRemediation(event, id, deviceIp, port) {
+      if (userRole !== "admin") {
+        alert("[!] Permission Denied: Read-only accounts cannot execute remediation.");
+        return;
+      }
+
+      if (!confirm(`Execute automated network recovery on target switch ${deviceIp} port ${port}?`)) return;
+
+      const btn = event.target;
+      btn.innerText = "Working...";
+      btn.disabled = true;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/incidents/remediate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: id, device_ip: deviceIp, port: port })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          alert(`[+] Success: ${result.message}`);
+          loadDashboardData();
+        } else {
+          alert(`[!] Automation Error: ${result.error || result.message}`);
+          loadDashboardData();
+        }
+      } catch (err) {
+        alert(`[!] Netmiko Execution Timeout/Crash: ${err.message}`);
+        loadDashboardData();
+      }
+    }
+
+    // Initialize Dashboard & Run First Auto Scan
+    loadDashboardData();
+    runDeviceScan();
+  </script>
+
+  <!-- WEBSOCKET REAL-TIME DISPATCH -->
+  <script>
+    const socket = io();
+
+    socket.on('new_incident', function(data) {
+      console.log("New incident received:", data);
+      
+      const tableBody = document.getElementById('incidents-table-body');
+      if (tableBody) {
+        if (tableBody.children.length === 1 && tableBody.children[0].children[0].colSpan === 5) {
+          tableBody.innerHTML = "";
+        }
+
+        const actionButton = userRole === "admin"
+          ? `<button class="px-3 py-1.5 bg-blue-600 text-white hover:bg-blue-700 rounded-lg text-xs font-semibold shadow-sm transition" 
+                     onclick="triggerDashboardRemediation(event, ${data.id || 0}, '${data.device_ip}', '${data.port}')">
+                 Remediate
+             </button>`
+          : `<span class="text-xs font-medium text-slate-400 italic">Read-Only</span>`;
+
+        const newRow = `
+          <tr id="incident-${data.port}" class="hover:bg-slate-50/50">
+            <td class="p-4 font-medium text-slate-800">${data.device_ip}</td>
+            <td class="p-4 text-slate-600">${data.port}</td>
+            <td class="p-4 text-slate-600 uppercase font-mono">${data.mac || data.mac_address}</td>
+            <td class="p-4">
+              <span class="px-2.5 py-1 bg-red-50 text-red-600 rounded-full text-xs font-semibold">Active</span>
+            </td>
+            <td class="p-4">
+              ${actionButton}
+            </td>
+          </tr>
+        `;
+        
+        tableBody.insertAdjacentHTML('afterbegin', newRow);
+        
+        const activeCounter = document.getElementById("incidents-count");
+        if (activeCounter) {
+          activeCounter.textContent = parseInt(activeCounter.textContent || "0") + 1;
+        }
+      }
+    });
+  </script>
+</body>
+</html>

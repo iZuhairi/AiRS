@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AiRS - Devices</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#f8fafc] text-slate-900 min-h-screen flex flex-col md:flex-row m-0 p-0 overflow-x-hidden">
+  <div id="sidebar-container"></div>
+
+  <main class="flex-1 min-w-0 w-full overflow-x-hidden p-4 md:p-8">
+    <div id="header-container"></div>
+
+    <!-- 📊 SECURITY TELEMETRY ANALYTICS SECTION -->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-8">
+      <div class="p-6 border-b border-slate-200 bg-slate-50/50">
+        <div class="flex justify-between items-center mb-6">
+          <div>
+            <h2 class="text-lg font-bold text-slate-800">Security Telemetry Analytics</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Real-time mapping of managed interface threat distributions</p>
+          </div>
+          <button onclick="loadDevices()" class="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-lg border border-slate-200 shadow-sm transition">
+            Refresh Dashboard
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Chart Module A: Time Trend Timeline -->
+          <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+            <div class="mb-3">
+              <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Security Violations Timeline</h3>
+              <p class="text-[11px] text-slate-400">Incident occurrences mapped out chronologically by hour blocks.</p>
+            </div>
+            <div class="h-48 w-full relative">
+              <canvas id="timelineChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart Module B: Frequent Target Offenders -->
+          <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+            <div class="mb-3">
+              <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Top Port Security Violators</h3>
+              <p class="text-[11px] text-slate-400">Identification index of high-frequency hardware switch ports tracking errors.</p>
+            </div>
+            <div class="h-48 w-full relative">
+              <canvas id="offendersChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MANAGED SWITCH DIRECTORY TABLE -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-50 text-slate-600 text-xs uppercase border-b border-slate-200">
+              <th class="px-6 py-3 font-semibold">ID</th>
+              <th class="px-6 py-3 font-semibold">Hostname</th>
+              <th class="px-6 py-3 font-semibold">IP Address</th>
+              <th class="px-6 py-3 font-semibold">Status</th>
+              <th class="px-6 py-3 font-semibold text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="devices-body" class="divide-y divide-slate-200 text-sm"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 🛠️ MANUAL ADMINISTRATIVE CONTROL PANEL -->
+    <div id="manual-override-card" class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div class="border-b border-slate-100 pb-4 mb-4">
+        <h2 class="text-base font-bold text-slate-900">Manual Port Configuration Override</h2>
+        <p class="text-xs text-slate-500 mt-0.5">Direct administrative override dispatch. Bounces or toggles operational state on select hardware interfaces.</p>
+      </div>
+      
+      <form id="manual-override-form" class="space-y-4 max-w-xl">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- SELECT TARGET SWITCH / MANUAL INPUT TOGGLE -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Target Switch IP</label>
+            <select id="override-ip-select" onchange="toggleManualIpInput(this.value)" 
+                    class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+              <option value="">Select a registered switch...</option>
+              <option value="custom">-- Manual Input (Unregistered IP) --</option>
+            </select>
+
+            <!-- Text input field shown only when custom option is selected -->
+            <input id="override-ip-custom" type="text" placeholder="Enter IP (e.g., 192.168.1.10)" 
+                   class="hidden mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Interface Port</label>
+            <input id="override-port" type="text" placeholder="e.g., FastEthernet0/5" required
+                   class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+          </div>
+        </div>
+
+        <div id="override-actions-container" class="flex gap-3 pt-2">
+          <button type="button" onclick="dispatchOverrideAction('bounce', this)" 
+                class="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed">
+            Bounce Interface (Reset)
+          </button>
+          <button type="button" onclick="dispatchOverrideAction('shutdown', this)" 
+                class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 transition focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed">
+            Administrative Shutdown
+          </button>
+        </div>
+      </form>
+    </div>
+
+  </main>
+
+  <script src="assets/script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    renderSidebar("devices");
+    renderHeader();
+
+    const currentUserRole = localStorage.getItem("userRole") || "user";
+
+    // Restrict Manual Override Controls for 'user' role
+    if (currentUserRole !== "admin") {
+      const overrideContainer = document.getElementById("override-actions-container");
+      if (overrideContainer) {
+        overrideContainer.innerHTML = `
+          <div class="w-full p-3 bg-slate-100 text-slate-500 rounded-lg text-xs font-medium text-center">
+            Manual override dispatch is disabled for read-only user accounts.
+          </div>
+        `;
+      }
+    }
+
+    function toggleManualIpInput(selectedValue) {
+      const customInput = document.getElementById("override-ip-custom");
+      if (selectedValue === "custom") {
+        customInput.classList.remove("hidden");
+        customInput.required = true;
+      } else {
+        customInput.classList.add("hidden");
+        customInput.required = false;
+        customInput.value = "";
+      }
+    }
+
+    async function loadDevices() {
+      try {
+        const [scanRes, incidentsRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/devices/scan`, { method: "POST" }),
+          fetch(`${API_BASE_URL}/incidents`)
+        ]);
+
+        const scanData = await scanRes.json();
+        const devices = scanData.results || scanData.devices || []; 
+        const incidents = await incidentsRes.json();
+
+        const tableBody = document.getElementById("devices-body");
+        const ipSelect = document.getElementById("override-ip-select");
+
+        if (tableBody) tableBody.innerHTML = "";
+
+        if (ipSelect) {
+          ipSelect.innerHTML = `
+            <option value="">Select a registered switch...</option>
+            <option value="custom">-- Manual Input (Unregistered IP) --</option>
+          `;
+        }
+
+        const deviceLookup = {};
+        if (Array.isArray(devices)) {
+          devices.forEach((dev) => {
+            deviceLookup[dev.ip_address] = dev.hostname;
+          });
+        }
+
+        if (!devices || devices.length === 0) {
+          if (tableBody) tableBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400">No managed devices found.</td></tr>`;
+        } else {
+          devices.forEach((device) => {
+            const devId = device.id || device._id;
+            if (ipSelect && currentUserRole === "admin") {
+              const opt = document.createElement("option");
+              opt.value = device.ip_address;
+              opt.textContent = `${device.hostname} (${device.ip_address})`;
+              ipSelect.insertBefore(opt, ipSelect.options[ipSelect.options.length - 1]);
+            }
+
+            const statusBadge = device.status
+              ? '<span class="px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-semibold">Online</span>'
+              : '<span class="px-2.5 py-1 bg-slate-50 text-slate-500 rounded-full text-xs font-semibold">Offline</span>';
+
+            let displayIP = device.ip_address;
+            if (currentUserRole !== "admin") {
+              const parts = device.ip_address.split(".");
+              displayIP = parts.length === 4 ? `${parts[0]}.${parts[1]}.*.*` : "RESTRICTED";
+            }
+
+            const actionControls = currentUserRole === "admin"
+              ? `
+                <button onclick="pingSwitch('${device.ip_address}', this)" class="px-3 py-1.5 bg-emerald-600 text-white hover:bg-emerald-700 rounded-lg text-xs font-semibold shadow-sm transition">Ping</button>
+                <button onclick="deleteSwitch(${devId}, '${device.hostname}')" class="px-3 py-1.5 bg-rose-600 text-white hover:bg-rose-700 rounded-lg text-xs font-semibold shadow-sm transition">Delete</button>
+              `
+              : `<span class="text-xs font-medium text-slate-400 italic">Restricted</span>`;
+
+            if (tableBody) {
+              tableBody.innerHTML += `
+                <tr class="hover:bg-slate-50/50">
+                  <td class="p-4 font-semibold text-slate-500 font-mono">#${devId}</td>
+                  <td class="p-4 font-medium text-slate-800">${device.hostname}</td>
+                  <td class="p-4 text-slate-600 font-mono">${displayIP}</td>
+                  <td class="p-4">${statusBadge}</td>
+                  <td class="p-4 text-right space-x-2">${actionControls}</td>
+                </tr>
+              `;
+            }
+          });
+        }
+
+        renderTelemetryAnalytics(incidents, deviceLookup);
+
+      } catch (err) {
+        console.error("Fetch error:", err);
+      }
+    }
+
+    function renderTelemetryAnalytics(incidents, deviceLookup) {
+      if (!Array.isArray(incidents)) return;
+
+      const portViolationCounts = {};
+
+      incidents.forEach((inc) => {
+        const ip = inc.device_ip || "";
+        const port = inc.port || "N/A";
+        const deviceName = deviceLookup[ip] ? deviceLookup[ip] : "Unregistered";
+        const fullLabel = `${port} (${deviceName})`;
+
+        portViolationCounts[fullLabel] = (portViolationCounts[fullLabel] || 0) + 1;
+      });
+
+      const sortedOffenders = Object.entries(portViolationCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+
+      const offenderLabels = sortedOffenders.map(([label]) => label);
+      const offenderData = sortedOffenders.map(([, count]) => count);
+
+      const ctxOffenders = document.getElementById("offendersChart");
+      if (ctxOffenders) {
+        if (window.offendersChartInstance) window.offendersChartInstance.destroy();
+
+        window.offendersChartInstance = new Chart(ctxOffenders, {
+          type: "bar",
+          data: {
+            labels: offenderLabels.length ? offenderLabels : ["No Incident Data"],
+            datasets: [{
+              label: "Security Violations",
+              data: offenderData.length ? offenderData : [0],
+              backgroundColor: "#f43f5e",
+              borderRadius: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => ` Violations: ${ctx.raw}`
+                }
+              }
+            },
+            scales: {
+              y: { beginAtZero: true, ticks: { precision: 0 } },
+              x: { 
+                ticks: { 
+                  font: { size: 10, weight: '500' },
+                  color: '#64748b'
+                } 
+              }
+            }
+          }
+        });
+      }
+
+      const timelineCounts = {};
+      incidents.forEach((inc) => {
+        const hour = inc.timestamp ? inc.timestamp.substring(11, 13) + ":00" : "00:00";
+        timelineCounts[hour] = (timelineCounts[hour] || 0) + 1;
+      });
+
+      const timelineLabels = Object.keys(timelineCounts).sort();
+      const timelineData = timelineLabels.map((time) => timelineCounts[time]);
+
+      const ctxTimeline = document.getElementById("timelineChart");
+      if (ctxTimeline) {
+        if (window.timelineChartInstance) window.timelineChartInstance.destroy();
+
+        window.timelineChartInstance = new Chart(ctxTimeline, {
+          type: "line",
+          data: {
+            labels: timelineLabels.length ? timelineLabels : ["00:00"],
+            datasets: [{
+              label: "Violations Count",
+              data: timelineData.length ? timelineData : [0],
+              borderColor: "rgba(37, 99, 235, 1)",
+              backgroundColor: "rgba(37, 99, 235, 0.1)",
+              fill: true,
+              tension: 0.3
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: { beginAtZero: true, ticks: { precision: 0 } }
+            }
+          }
+        });
+      }
+    }
+
+    async function dispatchOverrideAction(actionType, btnElement) {
+      if (currentUserRole !== "admin") {
+        await showAlertModal("Read-only accounts cannot execute manual port overrides.", "Permission Denied", "error");
+        return;
+      }
+
+      const selectVal = document.getElementById("override-ip-select").value;
+      const customIpVal = document.getElementById("override-ip-custom").value.trim();
+      const port = document.getElementById("override-port").value.trim();
+
+      let targetIp = selectVal === "custom" ? customIpVal : selectVal;
+
+      if (!targetIp) {
+        await showAlertModal("Please select a target switch or specify an IP address.", "Input Error", "warning");
+        return;
+      }
+
+      if (!port) {
+        await showAlertModal("Please specify the Interface Port.", "Input Error", "warning");
+        return;
+      }
+
+      const confirmed = await showConfirmModal(`Confirm ${actionType.toUpperCase()} operation on ${targetIp} port ${port}?`, "Execute Override");
+      if (!confirmed) return;
+
+      const container = document.getElementById("override-actions-container");
+      const buttons = container ? container.querySelectorAll("button") : [];
+      const origText = btnElement.innerText;
+      
+      btnElement.innerText = "Processing...";
+      buttons.forEach(b => b.disabled = true);
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/devices/override`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ device_ip: targetIp, port: port, action: actionType })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          await showAlertModal(result.message, "Success", "success");
+          document.getElementById("manual-override-form").reset();
+          toggleManualIpInput("");
+        } else {
+          await showAlertModal(result.error || result.message, "Override Error", "error");
+        }
+      } catch (err) {
+        await showAlertModal(err.message, "Execution Error", "error");
+      } finally {
+        btnElement.innerText = origText;
+        buttons.forEach(b => b.disabled = false);
+      }
+    }
+
+    async function pingSwitch(ip, btnElement) {
+      if (currentUserRole !== "admin") {
+        await showAlertModal("Read-only accounts cannot execute ping tests.", "Permission Denied", "error");
+        return;
+      }
+
+      const origText = btnElement.innerText;
+      btnElement.innerText = "...";
+      btnElement.disabled = true;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/devices/ping`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ip_address: ip })
+        });
+        const result = await response.json();
+        await showAlertModal(`ICMP Result (${ip}):\n${result.output}`, "Ping Diagnostics", "info");
+      } catch (err) {
+        await showAlertModal("Ping request failed.", "Network Error", "error");
+      } finally {
+        btnElement.innerText = origText;
+        btnElement.disabled = false;
+      }
+    }
+
+    async function deleteSwitch(id, hostname) {
+      if (currentUserRole !== "admin") {
+        await showAlertModal("Read-only accounts cannot delete devices.", "Permission Denied", "error");
+        return;
+      }
+
+      const confirmed = await showConfirmModal(`Are you sure you want to remove switch '${hostname}' (#${id})?`, "Confirm Deletion");
+      if (!confirmed) return;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/devices/${id}`, {
+          method: "DELETE"
+        });
+        if (response.ok) {
+          await showAlertModal(`Switch '${hostname}' removed successfully.`, "Deleted", "success");
+          loadDevices();
+        } else {
+          const res = await response.json();
+          await showAlertModal(`Delete failed: ${res.error}`, "Error", "error");
+        }
+      } catch (err) {
+        await showAlertModal("Failed to drop device record.", "Error", "error");
+      }
+    }
+
+    loadDevices();
+  </script>
+</body>
+</html>

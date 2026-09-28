@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AiRS - Incidents</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#f8fafc] text-slate-900 min-h-screen flex flex-col md:flex-row m-0 p-0 overflow-x-hidden">
+  <div id="sidebar-container"></div>
+
+  <main class="flex-1 min-w-0 w-full overflow-x-hidden p-4 md:p-8">
+    <div id="header-container"></div>
+
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="p-6 border-b border-slate-200 flex justify-between items-center">
+        <div>
+          <h2 class="text-lg font-bold text-slate-800">Security Incidents Logs</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Real-time history of detected port violations</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="openClearLogsModal()" class="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-semibold rounded-lg transition">
+            Clear Logs
+          </button>
+          <button onclick="loadIncidents()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition">
+            Refresh
+          </button>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-50 text-slate-600 text-sm border-b border-slate-200">
+              <th class="p-4 font-semibold">ID</th>
+              <th class="p-4 font-semibold">Device IP</th>
+              <th class="p-4 font-semibold">Port</th>
+              <th class="p-4 font-semibold">MAC Address</th>
+              <th class="p-4 font-semibold">Status</th>
+              <th class="p-4 font-semibold">Timestamp</th>
+              <th class="p-4 font-semibold">Action</th>
+            </tr>
+          </thead>
+          <tbody id="full-incidents-body" class="divide-y divide-slate-200 text-sm"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- 🗑️ CLEAR LOGS MODAL -->
+  <div id="clear-logs-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-[9999]">
+    <div class="bg-white border border-slate-200 rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4">
+      <div class="border-b border-slate-100 pb-3">
+        <h3 class="text-base font-bold text-slate-800">Clear Security Incidents</h3>
+        <p class="text-xs text-slate-500 mt-0.5">Configure incident deletion range and authorize with admin credentials.</p>
+      </div>
+
+      <form id="clear-logs-form" onsubmit="handleClearLogsSubmit(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Deletion Scope</label>
+          <select id="clear-scope-select" onchange="handleScopeChange(this.value)" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+            <option value="all">All Incidents (Purge Everything)</option>
+            <option value="by_id">Specific Incident ID</option>
+            <option value="range">Specific Date Range</option>
+            <option value="older_than">Older Than X Days</option>
+          </select>
+        </div>
+
+        <!-- Specific Log ID Input -->
+        <div id="id-input-container" class="hidden bg-slate-50 p-3 rounded-lg border border-slate-200">
+          <label class="block text-[11px] font-medium text-slate-600 mb-1">Target Incident ID #:</label>
+          <input type="number" id="clear-log-id" min="1" placeholder="e.g., 35" class="w-full rounded border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-blue-500">
+        </div>
+
+        <!-- Custom Date Range Inputs -->
+        <div id="range-inputs-container" class="hidden grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-lg border border-slate-200">
+          <div>
+            <label class="block text-[11px] font-medium text-slate-600 mb-1">Start Date</label>
+            <input type="date" id="clear-start-date" class="w-full rounded border border-slate-200 px-2 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-blue-500">
+          </div>
+          <div>
+            <label class="block text-[11px] font-medium text-slate-600 mb-1">End Date</label>
+            <input type="date" id="clear-end-date" class="w-full rounded border border-slate-200 px-2 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-blue-500">
+          </div>
+        </div>
+
+        <!-- Older Than Days Input -->
+        <div id="days-input-container" class="hidden bg-slate-50 p-3 rounded-lg border border-slate-200">
+          <label class="block text-[11px] font-medium text-slate-600 mb-1">Delete incidents older than (days):</label>
+          <input type="number" id="clear-days" min="1" placeholder="e.g., 30" class="w-full rounded border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-blue-500">
+        </div>
+
+        <div class="border-t border-slate-100 pt-3 space-y-3">
+          <span class="block text-xs font-bold text-rose-600 uppercase tracking-wider">Admin Authorization Required</span>
+          <div>
+            <label class="block text-[11px] font-medium text-slate-600 mb-1">Admin Username</label>
+            <input type="text" id="admin-user" required placeholder="admin" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+          </div>
+          <div>
+            <label class="block text-[11px] font-medium text-slate-600 mb-1">Admin Password</label>
+            <input type="password" id="admin-pass" required placeholder="••••••••" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" onclick="closeClearLogsModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition">
+            Cancel
+          </button>
+          <button type="submit" id="submit-clear-btn" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg shadow-sm transition">
+            Confirm & Delete Logs
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="assets/script.js"></script>
+  <script>
+    renderSidebar("incidents");
+    renderHeader();
+
+    const currentUserRole = localStorage.getItem("userRole") || "user";
+
+    async function loadIncidents() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/incidents`);
+        const incidents = await res.json();
+        const tableBody = document.getElementById("full-incidents-body");
+        if (!tableBody) return;
+        tableBody.innerHTML = "";
+
+        if (incidents.length === 0) {
+          tableBody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">No security incidents found.</td></tr>`;
+          return;
+        }
+
+        incidents.forEach((inc) => {
+          const isCritical = inc.status === "Active";
+          const statusBadge = isCritical
+            ? '<span class="px-2.5 py-1 bg-red-50 text-red-600 rounded-full text-xs font-semibold">Active</span>'
+            : '<span class="px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-semibold">Remediated</span>';
+
+          const actionButton = isCritical
+            ? `<button onclick="triggerRemediation(event, ${inc.id}, '${inc.device_ip}', '${inc.port}')" class="px-3 py-1.5 bg-blue-600 text-white hover:bg-blue-700 rounded-lg text-xs font-semibold shadow-sm transition">Clear Port Block</button>`
+            : '<span class="text-xs text-slate-400 font-medium">Mitigated</span>';
+
+          const displayHost = inc.device_display_name || inc.device_ip;
+
+          tableBody.innerHTML += `
+            <tr class="hover:bg-slate-50/50">
+              <td class="p-4 text-slate-500 font-mono">#${inc.id}</td>
+              <td class="p-4 font-medium text-slate-800">${displayHost}</td>
+              <td class="p-4 text-slate-600">${inc.port}</td>
+              <td class="p-4 text-slate-600 uppercase font-mono">${inc.mac_address || 'UNKNOWN'}</td>
+              <td class="p-4">${statusBadge}</td>
+              <td class="p-4 text-slate-500 text-xs">${inc.timestamp || '-'}</td>
+              <td class="p-4">${actionButton}</td>
+            </tr>
+          `;
+        });
+      } catch (err) {
+        console.error("Fetch error:", err);
+      }
+    }
+
+    // ⚡ RECOVERY AUTOMATION DISPATCH TRIGGER
+    async function triggerRemediation(event, id, deviceIp, port) {
+      if (!confirm(`Execute automated network recovery on target switch ${deviceIp} port ${port}?`)) return;
+
+      const btn = event.target;
+      btn.innerText = "Remediating...";
+      btn.disabled = true;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/incidents/remediate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: id, device_ip: deviceIp, port: port })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          alert(`[+] Success: ${result.message}`);
+          loadIncidents();
+        } else {
+          alert(`[!] Automation Error: ${result.error || result.message}`);
+          loadIncidents();
+        }
+      } catch (err) {
+        alert(`[!] Netmiko Execution Timeout/Crash: ${err.message}`);
+        loadIncidents();
+      }
+    }
+
+    // 🗑️ CLEAR LOGS MODAL HANDLERS
+    function openClearLogsModal() {
+      if (currentUserRole !== "admin") {
+        if (typeof showAlertModal === "function") {
+          showAlertModal("Only administrative accounts can access log purging features.", "Permission Denied", "error");
+        } else {
+          alert("Permission Denied: Only admins can clear logs.");
+        }
+        return;
+      }
+      document.getElementById("clear-logs-modal").classList.remove("hidden");
+    }
+
+    function closeClearLogsModal() {
+      document.getElementById("clear-logs-modal").classList.add("hidden");
+      document.getElementById("clear-logs-form").reset();
+      handleScopeChange("all");
+    }
+
+    function handleScopeChange(scope) {
+      const idContainer = document.getElementById("id-input-container");
+      const rangeContainer = document.getElementById("range-inputs-container");
+      const daysContainer = document.getElementById("days-input-container");
+
+      idContainer.classList.add("hidden");
+      rangeContainer.classList.add("hidden");
+      daysContainer.classList.add("hidden");
+
+      if (scope === "by_id") {
+        idContainer.classList.remove("hidden");
+      } else if (scope === "range") {
+        rangeContainer.classList.remove("hidden");
+      } else if (scope === "older_than") {
+        daysContainer.classList.remove("hidden");
+      }
+    }
+
+    async function handleClearLogsSubmit(e) {
+      e.preventDefault();
+
+      const adminUser = document.getElementById("admin-user").value.trim();
+      const adminPass = document.getElementById("admin-pass").value.trim();
+      const scope = document.getElementById("clear-scope-select").value;
+
+      if (adminUser !== "admin" || adminPass !== "admin123") {
+        if (typeof showAlertModal === "function") {
+          await showAlertModal("Invalid admin authorization credentials.", "Authentication Failed", "error");
+        } else {
+          alert("Invalid admin credentials!");
+        }
+        return;
+      }
+
+      // Explicitly direct deletion request to the incidents table
+      const payload = {
+        admin_user: adminUser,
+        admin_pass: adminPass,
+        scope: scope,
+        table: "incidents"
+      };
+
+      if (scope === "by_id") {
+        const logIdVal = document.getElementById("clear-log-id").value.trim();
+        if (!logIdVal) {
+          if (typeof showAlertModal === "function") {
+            await showAlertModal("Please specify a valid Log ID.", "Input Error", "warning");
+          } else {
+            alert("Please specify a valid Log ID.");
+          }
+          return;
+        }
+        payload.id = parseInt(logIdVal, 10);
+        payload.log_id = parseInt(logIdVal, 10);
+      } else if (scope === "range") {
+        payload.start_date = document.getElementById("clear-start-date").value;
+        payload.end_date = document.getElementById("clear-end-date").value;
+        if (!payload.start_date || !payload.end_date) {
+          if (typeof showAlertModal === "function") {
+            await showAlertModal("Please specify both Start Date and End Date.", "Input Error", "warning");
+          } else {
+            alert("Please specify both Start Date and End Date.");
+          }
+          return;
+        }
+      } else if (scope === "older_than") {
+        payload.days = parseInt(document.getElementById("clear-days").value, 10);
+        if (!payload.days || payload.days < 1) {
+          if (typeof showAlertModal === "function") {
+            await showAlertModal("Please specify a valid number of days.", "Input Error", "warning");
+          } else {
+            alert("Please specify a valid number of days.");
+          }
+          return;
+        }
+      }
+
+      const submitBtn = document.getElementById("submit-clear-btn");
+      submitBtn.disabled = true;
+      submitBtn.innerText = "Purging...";
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/logs/clear`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          closeClearLogsModal();
+          if (typeof showAlertModal === "function") {
+            await showAlertModal(result.message || "Incidents log cleared successfully.", "Success", "success");
+          } else {
+            alert("Incidents log cleared successfully.");
+          }
+          await loadIncidents();
+        } else {
+          if (typeof showAlertModal === "function") {
+            await showAlertModal(result.error || "Failed to clear incident log.", "Execution Error", "error");
+          } else {
+            alert(result.error || "Failed to clear incident log.");
+          }
+        }
+      } catch (err) {
+        if (typeof showAlertModal === "function") {
+          await showAlertModal("Error communicating with server endpoint.", "Network Error", "error");
+        } else {
+          alert("Network Error.");
+        }
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Confirm & Delete Logs";
+      }
+    }
+
+    loadIncidents();
+  </script>
+</body>
+</html>

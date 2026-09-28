@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AiRS - System Logs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#f8fafc] text-slate-900 min-h-screen flex flex-col md:flex-row m-0 p-0 overflow-x-hidden">
+  <div id="sidebar-container"></div>
+
+  <main class="flex-1 min-w-0 w-full overflow-x-hidden p-4 md:p-8">
+    <div id="header-container"></div>
+
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <!-- Top Bar: Header & Actions -->
+      <div class="p-6 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 class="text-lg font-bold text-slate-800">System Activity Logs</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Live syslog messages, authentication records, and automated remediation logs</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="openClearLogsModal()" class="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-semibold rounded-lg transition">
+            Clear Logs
+          </button>
+          <button onclick="loadLogs()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition">
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <!-- 🔍 Filter & Search Bar -->
+      <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-col lg:flex-row gap-3 items-center justify-between">
+        <div class="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
+          <!-- Category Filter -->
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <label for="log-category-filter" class="text-xs font-semibold text-slate-600 whitespace-nowrap">Category:</label>
+            <select id="log-category-filter" onchange="filterLogs()" class="w-full sm:w-auto rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-blue-500 bg-white shadow-sm">
+              <option value="all">All Logs</option>
+              <option value="admin">Admin Authentication & Access</option>
+              <option value="remediation">Remediation & Port Actions</option>
+              <option value="device">Device Management & Changes</option>
+              <option value="system">General System Events</option>
+            </select>
+          </div>
+
+          <!-- 📅 Date Filter -->
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <label for="log-date-filter" class="text-xs font-semibold text-slate-600 whitespace-nowrap">Date:</label>
+            <div class="relative w-full sm:w-auto flex items-center">
+              <input type="date" id="log-date-filter" onchange="filterLogs()" class="w-full sm:w-auto rounded-lg border border-slate-200 pl-3 pr-7 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-blue-500 bg-white shadow-sm">
+              <button type="button" onclick="clearDateFilter()" title="Clear date filter" class="absolute right-2 text-slate-400 hover:text-slate-600 text-xs font-bold">
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search Input -->
+        <div class="relative w-full lg:w-72">
+          <input type="text" id="log-search-input" onkeyup="filterLogs()" placeholder="Search logs (IP, event, ID)..." class="w-full rounded-lg border border-slate-200 pl-8 pr-3 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-blue-500 bg-white shadow-sm">
+          <svg class="w-4 h-4 text-slate-400 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Logs Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-50 text-slate-600 text-sm border-b border-slate-200">
+              <th class="p-4 font-semibold w-16">ID</th>
+              <th class="p-4 font-semibold w-32">Category</th>
+              <th class="p-4 font-semibold">Message / Event Detail</th>
+              <th class="p-4 font-semibold w-48">Timestamp</th>
+            </tr>
+          </thead>
+          <tbody id="logs-body" class="divide-y divide-slate-200 text-sm font-mono"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- 🗑️ CLEAR LOGS MODAL -->
+  <div id="clear-logs-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-[9999]">
+    <div class="bg-white border border-slate-200 rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4">
+      <div class="border-b border-slate-100 pb-3">
+        <h3 class="text-base font-bold text-slate-800">Clear System Activity Logs</h3>
+        <p class="text-xs text-slate-500 mt-0.5">Configure log deletion range and authorize with admin credentials.</p>
+      </div>
+
+      <form id="clear-logs-form" onsubmit="handleClearLogsSubmit(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Deletion Scope</label>
+          <select id="clear-scope-select" onchange="handleScopeChange(this.value)" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+            <option value="all">All Logs (Purge Everything)</option>
+            <option value="by_id">Specific Log ID</option>
+            <option value="range">Specific Date Range</option>
+            <option value="older_than">Older Than X Days</option>
+          </select>
+        </div>
+
+        <!-- Specific Log ID Input -->
+        <div id="id-input-container" class="hidden bg-slate-50 p-3 rounded-lg border border-slate-200">
+          <label class="block text-[11px] font-medium text-slate-600 mb-1">Target Log ID #:</label>
+          <input type="number" id="clear-log-id" min="1" placeholder="e.g., 1313" class="w-full rounded border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-blue-500">
+        </div>
+
+        <!-- Custom Date Range Inputs -->
+        <div id="range-inputs-container" class="hidden grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-lg border border-slate-200">
+          <div>
+            <label class="block text-[11px] font-medium text-slate-600 mb-1">Start Date</label>
+            <input type="date" id="clear-start-date" class="w-full rounded border border-slate-200 px-2 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-blue-500">
+          </div>
+          <div>
+            <label class="block text-[11px] font-medium text-slate-600 mb-1">End Date</label>
+            <input type="date" id="clear-end-date" class="w-full rounded border border-slate-200 px-2 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-blue-500">
+          </div>
+        </div>
+
+        <!-- Older Than Days Input -->
+        <div id="days-input-container" class="hidden bg-slate-50 p-3 rounded-lg border border-slate-200">
+          <label class="block text-[11px] font-medium text-slate-600 mb-1">Delete logs older than (days):</label>
+          <input type="number" id="clear-days" min="1" placeholder="e.g., 30" class="w-full rounded border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-blue-500">
+        </div>
+
+        <div class="border-t border-slate-100 pt-3 space-y-3">
+          <span class="block text-xs font-bold text-rose-600 uppercase tracking-wider">Admin Authorization Required</span>
+          <div>
+            <label class="block text-[11px] font-medium text-slate-600 mb-1">Admin Username</label>
+            <input type="text" id="admin-user" required placeholder="admin" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+          </div>
+          <div>
+            <label class="block text-[11px] font-medium text-slate-600 mb-1">Admin Password</label>
+            <input type="password" id="admin-pass" required placeholder="••••••••" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" onclick="closeClearLogsModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition">
+            Cancel
+          </button>
+          <button type="submit" id="submit-clear-btn" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg shadow-sm transition">
+            Confirm & Delete Logs
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="assets/script.js"></script>
+  <script>
+    renderSidebar("logs");
+    renderHeader();
+
+    const currentUserRole = localStorage.getItem("userRole") || "user";
+    let allLogsCache = []; // Holds master log dataset for instant filtering
+
+    async function loadLogs() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/logs`);
+        allLogsCache = await res.json();
+        filterLogs();
+      } catch (err) {
+        console.error("Fetch error:", err);
+      }
+    }
+
+    function detectCategory(msg) {
+      const lower = msg.toLowerCase();
+
+      // 1. Remediation & Port Actions (Check Cisco Syslogs & Port Changes FIRST)
+      if (
+        lower.includes("%link-") ||
+        lower.includes("administratively down") ||
+        lower.includes("remediation") ||
+        lower.includes("shutdown") ||
+        lower.includes("port") ||
+        lower.includes("override")
+      ) {
+        return { name: "Remediation", badge: "bg-amber-50 text-amber-700 border-amber-200", key: "remediation" };
+      }
+
+      // 2. Device Management (Console/VTY Configs & Device Changes)
+      if (
+        lower.includes("%sys-5-config_i") ||
+        lower.includes("configured from console") ||
+        lower.includes("device") ||
+        lower.includes("switch") ||
+        lower.includes("added") ||
+        lower.includes("removed")
+      ) {
+        return { name: "Device Mgmt", badge: "bg-blue-50 text-blue-700 border-blue-200", key: "device" };
+      }
+
+      // 3. Admin Auth (Dashboard Logins & Explicit User Authentication Logs)
+      if (
+        lower.includes("login") ||
+        lower.includes("logout") ||
+        lower.includes("authenticated") ||
+        lower.includes("dashboard access") ||
+        lower.includes("auth success") ||
+        lower.includes("auth fail")
+      ) {
+        return { name: "Admin Auth", badge: "bg-purple-50 text-purple-700 border-purple-200", key: "admin" };
+      }
+
+      // Fallback default
+      return { name: "System", badge: "bg-slate-100 text-slate-600 border-slate-200", key: "system" };
+    }
+
+    function clearDateFilter() {
+      document.getElementById("log-date-filter").value = "";
+      filterLogs();
+    }
+
+    function filterLogs() {
+      const categoryFilter = document.getElementById("log-category-filter").value;
+      const dateFilter = document.getElementById("log-date-filter").value;
+      const searchQuery = document.getElementById("log-search-input").value.toLowerCase().trim();
+      const tableBody = document.getElementById("logs-body");
+
+      tableBody.innerHTML = "";
+
+      if (!allLogsCache || allLogsCache.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400 font-sans">No system logs recorded yet.</td></tr>`;
+        return;
+      }
+
+      const filtered = allLogsCache.filter((log) => {
+        const categoryInfo = detectCategory(log.message);
+        
+        // Category Filter Match
+        const matchesCategory = categoryFilter === "all" || categoryInfo.key === categoryFilter;
+
+        // Date Filter Match (Matches YYYY-MM-DD format at start of timestamp)
+        const matchesDate = !dateFilter || (log.timestamp && log.timestamp.startsWith(dateFilter));
+
+        // Search Query Match
+        const matchesSearch = 
+          log.message.toLowerCase().includes(searchQuery) ||
+          String(log.id).includes(searchQuery) ||
+          (log.timestamp && log.timestamp.toLowerCase().includes(searchQuery));
+
+        return matchesCategory && matchesDate && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400 font-sans">No logs matching current filter criteria.</td></tr>`;
+        return;
+      }
+
+      filtered.forEach((log) => {
+        const cat = detectCategory(log.message);
+        tableBody.innerHTML += `
+          <tr class="hover:bg-slate-50/50">
+            <td class="p-4 text-slate-500 font-mono">#${log.id}</td>
+            <td class="p-4">
+              <span class="inline-block px-2 py-0.5 text-[11px] font-semibold border rounded-md whitespace-nowrap ${cat.badge}">
+                ${cat.name}
+              </span>
+            </td>
+            <td class="p-4 text-slate-800 break-all font-mono">${log.message}</td>
+            <td class="p-4 text-slate-500 text-xs font-sans whitespace-nowrap">${log.timestamp || '-'}</td>
+          </tr>
+        `;
+      });
+    }
+
+    function openClearLogsModal() {
+      if (currentUserRole !== "admin") {
+        if (typeof showAlertModal === "function") {
+          showAlertModal("Only administrative accounts can access log purging features.", "Permission Denied", "error");
+        } else {
+          alert("Permission Denied: Only admins can clear logs.");
+        }
+        return;
+      }
+      document.getElementById("clear-logs-modal").classList.remove("hidden");
+    }
+
+    function closeClearLogsModal() {
+      document.getElementById("clear-logs-modal").classList.add("hidden");
+      document.getElementById("clear-logs-form").reset();
+      handleScopeChange("all");
+    }
+
+    function handleScopeChange(scope) {
+      const idContainer = document.getElementById("id-input-container");
+      const rangeContainer = document.getElementById("range-inputs-container");
+      const daysContainer = document.getElementById("days-input-container");
+
+      idContainer.classList.add("hidden");
+      rangeContainer.classList.add("hidden");
+      daysContainer.classList.add("hidden");
+
+      if (scope === "by_id") {
+        idContainer.classList.remove("hidden");
+      } else if (scope === "range") {
+        rangeContainer.classList.remove("hidden");
+      } else if (scope === "older_than") {
+        daysContainer.classList.remove("hidden");
+      }
+    }
+
+    async function handleClearLogsSubmit(e) {
+      e.preventDefault();
+
+      const adminUser = document.getElementById("admin-user").value.trim();
+      const adminPass = document.getElementById("admin-pass").value.trim();
+      const scope = document.getElementById("clear-scope-select").value;
+
+      if (adminUser !== "admin" || adminPass !== "admin123") {
+        if (typeof showAlertModal === "function") {
+          await showAlertModal("Invalid admin authorization credentials.", "Authentication Failed", "error");
+        } else {
+          alert("Invalid admin credentials!");
+        }
+        return;
+      }
+
+      const payload = {
+        admin_user: adminUser,
+        admin_pass: adminPass,
+        scope: scope
+      };
+
+      if (scope === "by_id") {
+        const logIdVal = document.getElementById("clear-log-id").value.trim();
+        if (!logIdVal) {
+          if (typeof showAlertModal === "function") {
+            await showAlertModal("Please specify a valid Log ID.", "Input Error", "warning");
+          } else {
+            alert("Please specify a valid Log ID.");
+          }
+          return;
+        }
+        payload.id = parseInt(logIdVal, 10);
+        payload.log_id = parseInt(logIdVal, 10);
+      } else if (scope === "range") {
+        payload.start_date = document.getElementById("clear-start-date").value;
+        payload.end_date = document.getElementById("clear-end-date").value;
+        if (!payload.start_date || !payload.end_date) {
+          if (typeof showAlertModal === "function") {
+            await showAlertModal("Please specify both Start Date and End Date.", "Input Error", "warning");
+          } else {
+            alert("Please specify both Start Date and End Date.");
+          }
+          return;
+        }
+      } else if (scope === "older_than") {
+        payload.days = parseInt(document.getElementById("clear-days").value, 10);
+        if (!payload.days || payload.days < 1) {
+          if (typeof showAlertModal === "function") {
+            await showAlertModal("Please specify a valid number of days.", "Input Error", "warning");
+          } else {
+            alert("Please specify a valid number of days.");
+          }
+          return;
+        }
+      }
+
+      const submitBtn = document.getElementById("submit-clear-btn");
+      submitBtn.disabled = true;
+      submitBtn.innerText = "Purging...";
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/logs/clear`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          closeClearLogsModal();
+          if (typeof showAlertModal === "function") {
+            await showAlertModal(result.message || "Log cleared successfully.", "Success", "success");
+          } else {
+            alert("Log cleared successfully.");
+          }
+          await loadLogs();
+        } else {
+          if (typeof showAlertModal === "function") {
+            await showAlertModal(result.error || "Failed to clear log.", "Execution Error", "error");
+          } else {
+            alert(result.error || "Failed to clear log.");
+          }
+        }
+      } catch (err) {
+        if (typeof showAlertModal === "function") {
+          await showAlertModal("Error communicating with server endpoint.", "Network Error", "error");
+        } else {
+          alert("Network Error.");
+        }
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Confirm & Delete Logs";
+      }
+    }
+
+    loadLogs();
+  </script>
+</body>
+</html>

@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AiRS - Automated Incident Response System</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        cisco: {
+                            navy: '#011526',
+                            primary: '#005073',
+                            light: '#049fd9',
+                            bg: '#f0f4f8'
+                        }
+                    },
+                    animation: {
+                        'slide-up': 'slideUp 0.4s ease-out forwards',
+                    },
+                    keyframes: {
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(15px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-screen w-screen flex p-4 gap-6 antialiased selection:bg-cisco-light/30">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-72 h-full flex flex-col z-10">
+        <div class="glass-panel rounded-3xl h-full flex flex-col p-6 relative overflow-hidden">
+            
+            <!-- Logo / Title -->
+            <div class="mb-10 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cisco-primary to-cisco-light flex items-center justify-center shadow-lg shadow-cisco-light/30">
+                    <i class="fa-solid fa-network-wired text-2xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight text-cisco-primary">AiRS</h1>
+                    <p class="text-[10px] text-cisco-light uppercase tracking-widest font-bold">Project FYP</p>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex flex-col gap-2 flex-1">
+                <button onclick="navigate('intro')" id="btn-intro" class="nav-btn active bg-cisco-primary text-white flex items-center gap-4 w-full text-left px-5 py-4 rounded-2xl font-medium text-sm">
+                    <i class="fa-solid fa-layer-group w-5 text-center"></i>
+                    Introduction to Project
+                </button>
+                <button onclick="navigate('system-flow')" id="btn-system-flow" class="nav-btn bg-transparent text-slate-600 flex items-center gap-4 w-full text-left px-5 py-4 rounded-2xl font-medium text-sm">
+                    <i class="fa-solid fa-diagram-project w-5 text-center"></i>
+                    System Flow
+                </button>
+                <button onclick="navigate('scenarios')" id="btn-scenarios" class="nav-btn bg-transparent text-slate-600 flex items-center gap-4 w-full text-left px-5 py-4 rounded-2xl font-medium text-sm">
+                    <i class="fa-solid fa-shield-halved w-5 text-center"></i>
+                    Scenario Examples
+                </button>
+                <button onclick="navigate('dashboard')" id="btn-dashboard" class="nav-btn bg-transparent text-slate-600 flex items-center gap-4 w-full text-left px-5 py-4 rounded-2xl font-medium text-sm">
+                    <i class="fa-solid fa-desktop w-5 text-center"></i>
+                    AiRS Web (Dummy)
+                </button>
+            </nav>
+
+            <!-- User profile / Group Info -->
+            <div class="mt-auto pt-6 border-t border-slate-200">
+                <div class="flex items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                    <div class="w-10 h-10 rounded-full bg-cisco-light/10 text-cisco-primary flex items-center justify-center">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-700">Group 1</p>
+                        <p class="text-[10px] text-slate-500 font-medium">Isma, Aqil, Zuhairi</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 h-full relative z-0">
+        
+        <!-- SECTION 1: INTRODUCTION -->
+        <section id="sec-intro" class="content-section h-full flex flex-col gap-6 animate-slide-up">
+            <div class="glass-panel rounded-3xl p-8 flex items-center justify-between">
+                <div>
+                    <h2 class="text-3xl font-bold text-cisco-primary mb-2 tracking-tight">Project Introduction</h2>
+                    <p class="text-slate-500 font-medium">Automated Incident Response System for Enterprise Infrastructure</p>
+                </div>
+            </div>
+
+            <div class="flex-1 grid grid-cols-2 gap-6 min-h-0">
+                <div class="glass-panel rounded-3xl p-8 flex flex-col h-full overflow-y-auto">
+                    <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Problem Statement
+                    </h3>
+                    <div class="flex flex-col gap-6">
+                        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                            <h4 class="text-md font-bold text-cisco-primary mb-2">1. Manual Incident Delay</h4>
+                            <p class="text-slate-600 text-sm leading-relaxed">
+                                Traditional incident response heavily relies on human intervention. The latency between alert reception, logging into the CLI, and manual mitigation leaves a dangerous window of vulnerability.
+                            </p>
+                        </div>
+                        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                            <h4 class="text-md font-bold text-cisco-primary mb-2">2. High Cost of Commercial Software</h4>
+                            <p class="text-slate-600 text-sm leading-relaxed">
+                                Commercial enterprise monitoring solutions carry heavy licensing fees, making them inaccessible for SMEs.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel rounded-3xl p-8 flex flex-col h-full bg-gradient-to-br from-white to-cisco-bg">
+                    <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-bullseye text-cisco-light"></i> Core Objectives
+                    </h3>
+                    <div class="flex flex-col gap-4 flex-1 justify-center">
+                        <div class="flex items-start gap-4 p-4 hover:bg-slate-50 rounded-2xl transition-colors">
+                            <div class="w-10 h-10 rounded-xl bg-cisco-light/10 text-cisco-primary flex items-center justify-center shrink-0 mt-1 font-bold">1</div>
+                            <div>
+                                <h4 class="font-bold text-slate-800 mb-1">Emulate Infrastructure</h4>
+                                <p class="text-sm text-slate-600">Design an enterprise network core with strict Port Security inside EVE-NG.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4 p-4 hover:bg-slate-50 rounded-2xl transition-colors">
+                            <div class="w-10 h-10 rounded-xl bg-cisco-light/10 text-cisco-primary flex items-center justify-center shrink-0 mt-1 font-bold">2</div>
+                            <div>
+                                <h4 class="font-bold text-slate-800 mb-1">Develop Monitoring Daemon</h4>
+                                <p class="text-sm text-slate-600">Develop a Python socket daemon parsing Syslog via UDP 514 using Regex.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4 p-4 hover:bg-slate-50 rounded-2xl transition-colors">
+                            <div class="w-10 h-10 rounded-xl bg-cisco-light/10 text-cisco-primary flex items-center justify-center shrink-0 mt-1 font-bold">3</div>
+                            <div>
+                                <h4 class="font-bold text-slate-800 mb-1">Automate Remediation</h4>
+                                <p class="text-sm text-slate-600">Automate CLI mitigation via Netmiko SSH and push Discord Webhook alerts.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+<!-- SECTION 2: SYSTEM FLOW (CODED TOPOLOGY & FLOWCHART) -->
+        <section id="sec-system-flow" class="content-section h-full flex flex-col gap-6 hidden animate-slide-up">
+            
+            <div class="glass-panel rounded-3xl p-8 flex items-center justify-between">
+                <div>
+                    <h2 class="text-3xl font-bold text-cisco-primary mb-2 tracking-tight">Architecture & Flow</h2>
+                    <p class="text-slate-500 font-medium">Physical emulation and logical data processing</p>
+                </div>
+            </div>
+
+            <div class="flex-1 grid grid-cols-2 gap-6 min-h-0">
+                
+                <!-- KOTAK 1: CODED NETWORK TOPOLOGY -->
+                <div class="glass-panel rounded-3xl p-6 flex flex-col border-t-4 border-t-cisco-primary">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 px-2">1. Network Topology (EVE-NG)</h3>
+                    <div class="flex-1 bg-slate-50 rounded-2xl relative overflow-hidden flex flex-col items-center justify-between py-6 px-4 border border-slate-200">
+                        
+                        <!-- Garisan Sambungan (SVG) -->
+                        <svg class="absolute inset-0 w-full h-full z-0" style="pointer-events: none;">
+                            <!-- Router ke Switch -->
+                            <line x1="50%" y1="15%" x2="50%" y2="50%" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="4"/>
+                            <!-- Switch ke Admin PC -->
+                            <line x1="50%" y1="50%" x2="25%" y2="80%" stroke="#94a3b8" stroke-width="3"/>
+                            <!-- Switch ke Rogue MAC (Garis Merah Putus-putus) -->
+                            <line x1="50%" y1="50%" x2="75%" y2="80%" stroke="#ef4444" stroke-width="3" stroke-dasharray="6"/>
+                        </svg>
+
+                        <!-- Node 1: Core Router -->
+                        <div class="z-10 flex flex-col items-center">
+                            <div class="w-12 h-12 bg-white border-4 border-cisco-primary rounded-full flex items-center justify-center shadow-md">
+                                <i class="fa-solid fa-server text-cisco-primary"></i>
+                            </div>
+                            <span class="text-[10px] font-bold text-slate-700 mt-2 bg-white px-3 py-1 rounded-full shadow-sm border border-slate-200">Core Network</span>
+                        </div>
+
+                        <!-- Node 2: Access Switch -->
+                        <div class="z-10 flex flex-col items-center mt-6">
+                            <div class="w-16 h-10 bg-cisco-primary rounded flex items-center justify-center shadow-lg relative">
+                                <i class="fa-solid fa-network-wired text-white"></i>
+                                <!-- Lampu kelip-kelip (Port Security Active) -->
+                                <div class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white animate-pulse"></div>
+                            </div>
+                            <span class="text-[11px] font-bold text-slate-700 mt-2 bg-white px-3 py-1 rounded-full shadow-sm border border-slate-200">SW-Access-01</span>
+                            <span class="text-[9px] font-mono text-red-500 font-bold mt-1">Fa0/1 (PSECURE)</span>
+                        </div>
+
+                        <!-- Node 3: Hosts -->
+                        <div class="z-10 flex w-full justify-around mt-6">
+                            <div class="flex flex-col items-center">
+                                <div class="w-10 h-10 bg-white border-2 border-slate-400 rounded-lg flex items-center justify-center shadow-sm">
+                                    <i class="fa-solid fa-desktop text-slate-500"></i>
+                                </div>
+                                <span class="text-[10px] font-bold text-slate-600 mt-2">Admin PC</span>
+                            </div>
+                            
+                            <div class="flex flex-col items-center">
+                                <div class="w-10 h-10 bg-red-50 border-2 border-red-500 rounded-lg flex items-center justify-center shadow-sm animate-bounce">
+                                    <i class="fa-solid fa-user-secret text-red-500"></i>
+                                </div>
+                                <span class="text-[10px] font-bold text-red-600 mt-2">Rogue MAC</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- KOTAK 2: CODED SYSTEM PROCESS FLOW -->
+                <div class="glass-panel rounded-3xl p-6 flex flex-col border-t-4 border-t-cisco-light">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 px-2">2. System Process Flow</h3>
+                    <div class="flex-1 bg-slate-50 rounded-2xl flex flex-col justify-between py-5 px-6 border border-slate-200">
+                        
+                        <!-- Step 1 -->
+                        <div class="flex items-center gap-4 relative z-10 group">
+                            <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center shrink-0 border border-red-200 shadow-sm group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-triangle-exclamation text-red-500"></i>
+                            </div>
+                            <div class="bg-white border border-slate-200 p-2.5 rounded-xl flex-1 shadow-sm">
+                                <p class="text-xs font-bold text-slate-800">1. Security Breach</p>
+                                <p class="text-[10px] text-slate-500">Switch detects rogue MAC insertion</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Arrow Down -->
+                        <div class="w-full flex justify-center py-1"><i class="fa-solid fa-arrow-down text-slate-300"></i></div>
+
+                        <!-- Step 2 -->
+                        <div class="flex items-center gap-4 relative z-10 group">
+                            <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center shrink-0 border border-amber-200 shadow-sm group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-file-lines text-amber-500"></i>
+                            </div>
+                            <div class="bg-white border border-slate-200 p-2.5 rounded-xl flex-1 shadow-sm">
+                                <p class="text-xs font-bold text-slate-800">2. Syslog Transmission</p>
+                                <p class="text-[10px] text-slate-500">UDP Port 514 broadcasts event logs</p>
+                            </div>
+                        </div>
+
+                        <!-- Arrow Down -->
+                        <div class="w-full flex justify-center py-1"><i class="fa-solid fa-arrow-down text-slate-300"></i></div>
+
+                        <!-- Step 3 -->
+                        <div class="flex items-center gap-4 relative z-10 group">
+                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center shrink-0 border border-blue-200 shadow-sm group-hover:scale-110 transition-transform">
+                                <i class="fa-brands fa-python text-blue-600 text-lg"></i>
+                            </div>
+                            <div class="bg-white border border-slate-200 p-2.5 rounded-xl flex-1 shadow-sm border-l-4 border-l-blue-500">
+                                <p class="text-xs font-bold text-slate-800">3. AiRS Daemon (Regex)</p>
+                                <p class="text-[10px] text-slate-500">Python intercepts & validates signature</p>
+                            </div>
+                        </div>
+
+                        <!-- Split Arrows -->
+                        <div class="flex justify-around px-8 py-2">
+                            <i class="fa-solid fa-arrow-down-left text-slate-300"></i>
+                            <i class="fa-solid fa-arrow-down-right text-slate-300"></i>
+                        </div>
+
+                        <!-- Step 4 (Parallel Actions) -->
+                        <div class="flex items-center gap-3 relative z-10">
+                            <!-- Netmiko Action -->
+                            <div class="flex-1 bg-emerald-50 border border-emerald-200 p-3 rounded-xl shadow-sm flex flex-col items-center hover:-translate-y-1 transition-transform cursor-default">
+                                <i class="fa-solid fa-terminal text-emerald-600 mb-1.5 text-lg"></i>
+                                <p class="text-[11px] font-bold text-emerald-700 text-center">Netmiko SSH</p>
+                                <p class="text-[9px] text-emerald-600 text-center">Port Shutdown</p>
+                            </div>
+                            <!-- Webhook Action -->
+                            <div class="flex-1 bg-[#5865F2]/10 border border-[#5865F2]/30 p-3 rounded-xl shadow-sm flex flex-col items-center hover:-translate-y-1 transition-transform cursor-default">
+                                <i class="fa-brands fa-discord text-[#5865F2] mb-1.5 text-lg"></i>
+                                <p class="text-[11px] font-bold text-[#5865F2] text-center">Webhook</p>
+                                <p class="text-[9px] text-[#5865F2]/80 text-center">Admin Alert</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+ <!-- SECTION 3: SCENARIO EXAMPLES (NESTED SLIDER UI) -->
+        <section id="sec-scenarios" class="content-section h-full flex flex-col gap-6 hidden animate-slide-up">
+             
+            <!-- Header & Tabs -->
+            <div class="glass-panel rounded-3xl p-6 flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold text-cisco-primary tracking-tight">Scenario Demonstration</h2>
+                </div>
+                
+                <!-- Tabs (Tukar Senario Utama) -->
+                <div class="flex gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200" id="scenario-tabs">
+                    <button onclick="goToScenario(1)" id="tab-1" class="scenario-tab active px-6 py-2 rounded-lg text-sm font-semibold bg-white text-cisco-primary shadow-sm transition-all">
+                        S1: Rogue MAC Attack
+                    </button>
+                    <button onclick="goToScenario(2)" id="tab-2" class="scenario-tab px-6 py-2 rounded-lg text-sm font-semibold text-slate-500 hover:text-slate-800 bg-transparent transition-all">
+                        S2: Unauthorized Switch
+                    </button>
+                    <button onclick="goToScenario(3)" id="tab-3" class="scenario-tab px-6 py-2 rounded-lg text-sm font-semibold text-slate-500 hover:text-slate-800 bg-transparent transition-all">
+                        S3: Admin Override
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="flex-1 glass-panel rounded-3xl p-6 flex flex-col min-h-0 relative">
+                <div class="grid grid-cols-5 gap-6 h-full">
+                    
+                    <!-- ========================================== -->
+                    <!-- BAHAGIAN KIRI (Teks Penerangan Setiap Slide) -->
+                    <!-- ========================================== -->
+                    <div class="col-span-2 flex flex-col justify-center px-4 relative">
+                        
+                        <!-- SCENARIO 1 TEXTS (3 Slides) -->
+                        <div id="text-s1-slide1" class="scenario-text transition-opacity duration-300">
+                            <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-xl mb-6 shadow-sm"><i class="fa-solid fa-user-secret"></i></div>
+                            <h3 class="text-2xl font-bold text-slate-800 mb-4">Phase 1: The Breach</h3>
+                            <p class="text-slate-600 text-base leading-relaxed mb-8">An unauthorized machine connects to the enterprise switch, injecting an unregistered MAC address.</p>
+                        </div>
+                        <div id="text-s1-slide2" class="scenario-text hidden transition-opacity duration-300">
+                            <div class="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xl mb-6 shadow-sm"><i class="fa-solid fa-satellite-dish"></i></div>
+                            <h3 class="text-2xl font-bold text-slate-800 mb-4">Phase 2: Syslog Detection</h3>
+                            <p class="text-slate-600 text-base leading-relaxed mb-8">The Python Daemon catches UDP 514 packets. The Regex engine filters out the exact violation signature.</p>
+                        </div>
+                        <div id="text-s1-slide3" class="scenario-text hidden transition-opacity duration-300">
+                            <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl mb-6 shadow-sm"><i class="fa-solid fa-shield-halved"></i></div>
+                            <h3 class="text-2xl font-bold text-slate-800 mb-4">Phase 3: Automated Mitigation</h3>
+                            <p class="text-slate-600 text-base leading-relaxed mb-8">The script establishes SSH via Netmiko, shutting down the port and alerting admins via Discord.</p>
+                        </div>
+
+                        <!-- SCENARIO 2 TEXTS (3 Slides Placeholders) -->
+                        <div id="text-s2-slide1" class="scenario-text hidden transition-opacity duration-300">
+                            <h3 class="text-2xl font-bold text-slate-800 mb-4">S2 - Slide 1: Introduction</h3>
+                            <p class="text-slate-600">Penerangan slide pertama untuk senario kedua di sini.</p>
+                        </div>
+                        <div id="text-s2-slide2" class="scenario-text hidden transition-opacity duration-300">
+                            <h3 class="text-2xl font-bold text-slate-800 mb-4">S2 - Slide 2: Action</h3>
+                            <p class="text-slate-600">Penerangan slide kedua untuk senario kedua di sini.</p>
+                        </div>
+                        <div id="text-s2-slide3" class="scenario-text hidden transition-opacity duration-300">
+                            <h3 class="text-2xl font-bold text-slate-800 mb-4">S2 - Slide 3: Resolution</h3>
+                            <p class="text-slate-600">Penerangan slide ketiga untuk senario kedua di sini.</p>
+                        </div>
+
+                        <!-- SCENARIO 3 TEXTS (3 Slides Placeholders) -->
+                        <div id="text-s3-slide1" class="scenario-text hidden transition-opacity duration-300">
+                            <h3 class="text-2xl font-bold text-slate-800 mb-4">S3 - Slide 1: System Lock</h3>
+                            <p class="text-slate-600">Penerangan slide pertama untuk senario ketiga di sini.</p>
+                        </div>
+                        <div id="text-s3-slide2" class="scenario-text hidden transition-opacity duration-300">
+                            <h3 class="text-2xl font-bold text-slate-800 mb-4">S3 - Slide 2: Admin Request</h3>
+                            <p class="text-slate-600">Penerangan slide kedua untuk senario ketiga di sini.</p>
+                        </div>
+                        <div id="text-s3-slide3" class="scenario-text hidden transition-opacity duration-300">
+                            <h3 class="text-2xl font-bold text-slate-800 mb-4">S3 - Slide 3: Port Bounce</h3>
+                            <p class="text-slate-600">Penerangan slide ketiga untuk senario ketiga di sini.</p>
+                        </div>
+
+                    </div>
+
+                    <!-- ========================================== -->
+                    <!-- BAHAGIAN KANAN (Visual Slider) -->
+                    <!-- ========================================== -->
+                    <div class="col-span-3 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col relative">
+                        <div class="flex-1 relative overflow-hidden bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-center p-6">
+                            
+                            <!-- SCENARIO 1 VISUALS -->
+                            <div id="visual-s1-slide1" class="scenario-visual w-full h-full flex items-center justify-center gap-8">
+                                <div class="flex flex-col items-center">
+                                    <div class="w-16 h-16 bg-slate-800 rounded-xl flex items-center justify-center shadow-lg border-b-4 border-red-500"><i class="fa-solid fa-skull-crossbones text-red-500 text-2xl animate-pulse"></i></div>
+                                    <span class="mt-3 text-xs font-bold text-slate-700">Kali Linux</span>
+                                </div>
+                                <div class="flex flex-col items-center mt-[-30px]">
+                                    <div class="h-1 bg-red-400 w-16 relative"><div class="absolute right-0 -top-1.5 w-0 h-0 border-t-4 border-b-4 border-l-[6px] border-t-transparent border-b-transparent border-l-red-400"></div></div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <div class="w-20 h-16 bg-cisco-primary rounded-lg flex items-center justify-center shadow-lg relative border-b-4 border-cisco-navy"><i class="fa-solid fa-network-wired text-white text-2xl"></i></div>
+                                    <span class="mt-3 text-xs font-bold text-slate-700">Access Switch</span>
+                                </div>
+                            </div>
+                            
+                            <div id="visual-s1-slide2" class="scenario-visual hidden w-full h-full flex-col items-center justify-center">
+                                <div class="w-full max-w-md bg-[#0a192f] rounded-lg shadow-xl overflow-hidden border border-slate-700">
+                                    <div class="bg-slate-800 px-4 py-2 flex justify-between items-center"><span class="text-xs text-slate-400 font-mono"><i class="fa-solid fa-terminal"></i> daemon_parser.py</span></div>
+                                    <div class="p-5 font-mono text-[11px] text-slate-300 space-y-2 w-full text-left">
+                                        <p>> Listening on UDP 514...</p>
+                                        <p class="text-amber-400 bg-amber-400/10 p-2 rounded">> Recv: %PORT_SECURITY-2-PSECURE_VIOLATION...</p>
+                                        <p class="text-emerald-400 font-bold">> [REGEX MATCH] Signature Detected!</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="visual-s1-slide3" class="scenario-visual hidden w-full h-full items-center justify-center gap-4 px-4">
+                                <div class="flex-1 bg-slate-800 rounded-xl p-4 border-l-4 border-emerald-500 h-40 flex flex-col justify-center">
+                                    <h4 class="text-xs font-bold text-emerald-400 mb-2"><i class="fa-solid fa-terminal"></i> Netmiko Action</h4>
+                                    <p class="font-mono text-[10px] text-slate-300 text-left">> interface Fa0/1<br><span class="text-red-400 font-bold">> shutdown</span></p>
+                                </div>
+                                <div class="flex-1 bg-white rounded-xl p-4 border-l-4 border-[#5865F2] h-40 flex flex-col justify-center">
+                                    <h4 class="text-xs font-bold text-[#5865F2] mb-3"><i class="fa-brands fa-discord"></i> Discord Webhook</h4>
+                                    <p class="text-[10px] text-slate-600 text-left">Port: Fa0/1<br><strong class="text-red-500">Status: SHUTDOWN</strong></p>
+                                </div>
+                            </div>
+
+                            <!-- SCENARIO 2 VISUALS (Placeholders) -->
+                            <div id="visual-s2-slide1" class="scenario-visual hidden w-full h-full items-center justify-center"><h1 class="text-slate-400 font-bold">VISUAL S2 - SLIDE 1</h1></div>
+                            <div id="visual-s2-slide2" class="scenario-visual hidden w-full h-full items-center justify-center"><h1 class="text-slate-400 font-bold">VISUAL S2 - SLIDE 2</h1></div>
+                            <div id="visual-s2-slide3" class="scenario-visual hidden w-full h-full items-center justify-center"><h1 class="text-slate-400 font-bold">VISUAL S2 - SLIDE 3</h1></div>
+
+                            <!-- SCENARIO 3 VISUALS (Placeholders) -->
+                            <div id="visual-s3-slide1" class="scenario-visual hidden w-full h-full items-center justify-center"><h1 class="text-slate-400 font-bold">VISUAL S3 - SLIDE 1</h1></div>
+                            <div id="visual-s3-slide2" class="scenario-visual hidden w-full h-full items-center justify-center"><h1 class="text-slate-400 font-bold">VISUAL S3 - SLIDE 2</h1></div>
+                            <div id="visual-s3-slide3" class="scenario-visual hidden w-full h-full items-center justify-center"><h1 class="text-slate-400 font-bold">VISUAL S3 - SLIDE 3</h1></div>
+
+                        </div>
+
+                        <!-- Bottom Navigation Controls (Berubah untuk kawal SLIDE) -->
+                        <div class="mt-4 flex justify-between items-center border-t border-slate-100 pt-4">
+                            <button onclick="prevSlide()" id="btn-prev" disabled class="px-5 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-500 hover:bg-slate-50 hover:text-slate-800 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2 transition-all">
+                                <i class="fa-solid fa-chevron-left"></i> PREV
+                            </button>
+                            
+                            <span class="text-xs font-bold text-slate-400 tracking-widest bg-slate-50 px-4 py-1.5 rounded-full border border-slate-200" id="slide-indicator">
+                                SLIDE 1 OF 3
+                            </span>
+                            
+                            <button onclick="nextSlide()" id="btn-next" class="px-5 py-2.5 bg-cisco-primary text-white border border-transparent rounded-lg text-sm font-bold hover:bg-[#003d59] shadow-sm hover:shadow flex items-center gap-2 transition-all">
+                                NEXT <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- SECTION 4: AiRS WEB (DUMMY DASHBOARD DENGAN SIDEBAR) -->
+        <section id="sec-dashboard" class="content-section h-full flex flex-col gap-0 hidden animate-slide-up">
+            
+            <!-- Mock Browser Window Frame (Mac Style) -->
+            <div class="bg-white border border-slate-200 border-b-0 rounded-t-2xl p-3 flex items-center gap-4 shadow-sm z-10 relative">
+                <!-- Mac style buttons -->
+                <div class="flex gap-2 pl-2">
+                    <div class="w-3.5 h-3.5 rounded-full bg-red-400 border border-red-500/20"></div>
+                    <div class="w-3.5 h-3.5 rounded-full bg-amber-400 border border-amber-500/20"></div>
+                    <div class="w-3.5 h-3.5 rounded-full bg-emerald-400 border border-emerald-500/20"></div>
+                </div>
+                <!-- URL Bar -->
+                <div class="bg-slate-100 text-slate-500 text-xs font-mono py-2 px-6 rounded-lg flex-1 text-center border border-slate-200 shadow-inner max-w-2xl mx-auto flex items-center justify-center gap-2" id="browser-url">
+                    <i class="fa-solid fa-lock text-slate-400"></i> 127.0.0.1:5000 / dashboard
+                </div>
+                <div class="w-16"></div> 
+            </div>
+
+            <!-- Mini Website Body (Sidebar + iFrame) -->
+            <div class="glass-panel bg-white rounded-b-2xl rounded-t-none flex-1 flex shadow-lg border-t-0 overflow-hidden relative">
+                
+                <div class="w-64 bg-white border-r border-slate-200 flex flex-col z-10 flex-shrink-0">
+                    <div class="p-6 pb-4">
+                        <h1 class="text-2xl font-bold text-blue-600 tracking-wider">AiRS</h1>
+                    </div>
+                    
+                    <nav class="flex flex-col gap-1 flex-1 px-4 py-2 overflow-y-auto">
+                        <button onclick="changeIframePage('indexdummy.html', 'dashboard', this)" class="dummy-nav-btn flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium bg-blue-50 text-blue-600 transition-colors">
+                            Dashboard
+                        </button>
+                        <button onclick="changeIframePage('incidents.html', 'incidents', this)" class="dummy-nav-btn flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                            Incidents
+                        </button>
+                        <button onclick="changeIframePage('devices.html', 'devices', this)" class="dummy-nav-btn flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                            Devices
+                        </button>
+                        <button onclick="changeIframePage('logs.html', 'logs', this)" class="dummy-nav-btn flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                            Logs
+                        </button>
+                        <button onclick="changeIframePage('register.html', 'register', this)" class="dummy-nav-btn flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                            Register
+                        </button>
+                        <button onclick="changeIframePage('settings.html', 'settings', this)" class="dummy-nav-btn flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                            Settings
+                        </button>
+                    </nav>
+
+                    <!-- Logout Button di bawah -->
+                    <div class="p-4 pt-2">
+                        <button onclick="changeIframePage('indexdummy.html', 'dashboard', this)" class="w-full py-3 rounded-xl text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors border border-red-100">
+                            Logout
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Kontainer iFrame -->
+                <div class="flex-1 bg-slate-50 relative">
+                    <!-- Muat indexdummy.html -->
+                    <iframe id="airs-iframe" src="indexdummy.html" class="w-full h-full border-none absolute inset-0 bg-slate-50" title="AiRS Main Website"></iframe>
+                </div>
+                
+            </div>
+        </section>
+
+    </main>
+
+    <!-- External JS -->
+    <script src="script.js"></script>
+</body>
+</html>
