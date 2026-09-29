@@ -1,0 +1,185 @@
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent; 
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1; 
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #049fd9; 
+}
+
+/* Custom Scrollbar untuk Poster */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent; 
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1; 
+    border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8; 
+}
+
+/* Light Glassmorphism Panels */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 1);
+    box-shadow: 0 10px 40px -10px rgba(0, 80, 115, 0.1);
+    transition: all 0.3s ease;
+}
+
+.glass-panel:hover {
+    box-shadow: 0 20px 40px -10px rgba(4, 159, 217, 0.2);
+    border-color: rgba(4, 159, 217, 0.2);
+}
+
+/* Sidebar Nav Buttons */
+.nav-btn {
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.nav-btn:not(.active):hover {
+    background: rgba(4, 159, 217, 0.05);
+    color: #005073;
+}
+
+.nav-btn.active {
+    box-shadow: 0 4px 15px rgba(0, 80, 115, 0.25);
+}
+
+/* Inner Content Tabs */
+.content-tab {
+    transition: all 0.2s ease;
+    border-bottom: 2px solid transparent;
+}
+.content-tab.active {
+    color: #005073;
+    border-bottom-color: #005073;
+    font-weight: 600;
+}
+
+/* Background styling */
+body {
+    background-color: #f0f4f8;
+    background-image: 
+        radial-gradient(circle at 10% 10%, rgba(4, 159, 217, 0.07) 0%, transparent 50%),
+        radial-gradient(circle at 90% 90%, rgba(0, 80, 115, 0.05) 0%, transparent 50%);
+    color: #1e293b; 
+    overflow: hidden;
+}
+
+/* =========================================
+   TOPOLOGY INTERACTIVE ANIMATIONS
+========================================= */
+.topo-node {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 10;
+    transition: opacity 0.3s ease;
+}
+.topo-node .icon-box {
+    width: 40px; height: 40px;
+    background: white;
+    border: 2px solid #cbd5e1;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+.topo-node span { margin-top: 6px; font-size: 10px; font-weight: bold; color: #475569; background: rgba(255,255,255,0.8); padding: 2px 6px; border-radius: 4px;}
+.port-indicator {
+    position: absolute;
+    bottom: 20px; left: -5px;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    border: 2px solid white;
+    transition: all 0.3s ease;
+}
+
+/* SVG Cables Base */
+.cable { stroke: #cbd5e1; stroke-width: 0.8; transition: all 0.3s ease; }
+.cable-dotted { stroke-dasharray: 2 2; }
+.cable-ssh { stroke: transparent; stroke-width: 0.8; transition: all 0.3s ease; stroke-dasharray: 4 4; }
+
+/* Animation Keyframes (Packet Tracer Effect) */
+@keyframes flow-packet { to { stroke-dashoffset: -20; } }
+@keyframes flow-reverse { to { stroke-dashoffset: 20; } }
+
+/* -----------------------------------------
+   STATE LOGIC (Muka CSS Pintar) 
+----------------------------------------- */
+/* Default Hide Rogue Cable & SSH */
+#line-rogue { opacity: 0; }
+#line-ssh1, #line-ssh2 { opacity: 0; }
+#node-rogue { opacity: 0.4; }
+
+/* S1-1: Normal Ping */
+[data-state="s1-1"] #line-c1, [data-state="s1-1"] #line-sw1-rt, [data-state="s1-1"] #line-rt-srv { stroke: #10b981; stroke-width: 1.5; stroke-dasharray: 4; animation: flow-packet 1s linear infinite; }
+
+/* S1-2: Rogue Swaps */
+[data-state="s1-2"] #line-c1 { opacity: 0; }
+[data-state="s1-2"] #node-c1 { opacity: 0.4; }
+[data-state="s1-2"] #line-rogue { opacity: 1; stroke: #cbd5e1; }
+[data-state="s1-2"] #node-rogue { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+
+/* S1-3: Violation Ping */
+[data-state="s1-3"] #line-c1 { opacity: 0; }
+[data-state="s1-3"] #node-c1 { opacity: 0.4; }
+[data-state="s1-3"] #line-rogue { opacity: 1; stroke: #ef4444; stroke-width: 1.5; stroke-dasharray: 4; animation: flow-packet 1s linear infinite; }
+[data-state="s1-3"] #port-sw1 { background: #ef4444; animation: ping 1s infinite; }
+
+/* S1-4: Syslog Alert */
+[data-state="s1-4"] #line-c1 { opacity: 0; }
+[data-state="s1-4"] #line-rogue { opacity: 1; }
+[data-state="s1-4"] #port-sw1 { background: #ef4444; }
+[data-state="s1-4"] #line-sw1-rt, [data-state="s1-4"] #line-rt-srv, [data-state="s1-4"] #line-srv-adm, [data-state="s1-4"] #line-srv-mon { stroke: #f59e0b; stroke-width: 1.5; stroke-dasharray: 4; animation: flow-packet 1s linear infinite; }
+[data-state="s1-4"] #alert-badge { display: block; }
+
+/* S1-5: Rogue Leaves */
+[data-state="s1-5"] #line-c1 { opacity: 1; }
+[data-state="s1-5"] #node-c1 { opacity: 1; }
+[data-state="s1-5"] #node-rogue { opacity: 0.4; }
+[data-state="s1-5"] #port-sw1 { background: #ef4444; }
+
+/* S1-6: Admin SSH */
+[data-state="s1-6"] #port-sw1 { background: #10b981; }
+[data-state="s1-6"] #line-ssh1 { opacity: 1; stroke: #0ea5e9; stroke-width: 1.5; animation: flow-reverse 1s linear infinite; }
+
+/* S1-7: Normal Restored */
+[data-state="s1-7"] #line-c1, [data-state="s1-7"] #line-sw1-rt, [data-state="s1-7"] #line-rt-srv { stroke: #10b981; stroke-width: 1.5; stroke-dasharray: 4; animation: flow-packet 1s linear infinite; }
+
+/* S2-1: Normal Ping */
+[data-state="s2-1"] #line-c2, [data-state="s2-1"] #line-sw2-rt, [data-state="s2-1"] #line-rt-srv { stroke: #10b981; stroke-width: 1.5; stroke-dasharray: 4; animation: flow-packet 1s linear infinite; }
+
+/* S2-2: Admin Decides */
+[data-state="s2-2"] #node-adm { transform: translate(-50%, -50%) scale(1.2); }
+
+/* S2-3: Manual Shutdown */
+[data-state="s2-3"] #line-ssh2 { opacity: 1; stroke: #0ea5e9; stroke-width: 1.5; animation: flow-reverse 1s linear infinite; }
+[data-state="s2-3"] #port-sw2 { background: #ef4444; }
+[data-state="s2-3"] #line-c2 { stroke: #ef4444; stroke-dasharray: 2 4; }
+
+/* --- Animasi Floating Admin (Fixed) --- */
+@keyframes float {
+    0%, 100% { transform: translate(-50%, -50%); }
+    50% { transform: translate(-50%, calc(-50% - 10px)); }
+}
+
+/* Animasi ni HANYA akan berjalan bila Topologi berada di Scenario 2, Slide 3 */
+#topology-container[data-state="s2-3"] #admin-node {
+    animation: float 2.5s ease-in-out infinite;
+}
