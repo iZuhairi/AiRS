@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AiRS - Automated Incident Response System</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        cisco: {
+                            navy: '#011526',
+                            primary: '#005073',
+                            light: '#049fd9',
+                            bg: '#f0f4f8'
+                        }
+                    },
+                    animation: {
+                        'slide-up': 'slideUp 0.4s ease-out forwards',
+                    },
+                    keyframes: {
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(15px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen lg:h-screen w-screen flex flex-col lg:flex-row p-4 gap-6 antialiased selection:bg-cisco-light/30 overflow-x-hidden overflow-y-auto lg:overflow-hidden">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-full lg:w-72 h-auto lg:h-full flex flex-col z-10 shrink-0">
+        <div class="glass-panel rounded-3xl h-full flex flex-col p-6 relative overflow-hidden">
+            
+            <!-- Logo / Title -->
+            <div class="mb-10 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cisco-primary to-cisco-light flex items-center justify-center shadow-lg shadow-cisco-light/30">
+                    <i class="fa-solid fa-network-wired text-2xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight text-cisco-primary">AiRS</h1>
+                    <p class="text-[10px] text-cisco-light uppercase tracking-widest font-bold">FYP Project</p>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex flex-col gap-2 flex-1">
+                <button onclick="navigate('intro')" id="btn-intro" class="nav-btn active bg-cisco-primary text-white flex items-center gap-4 w-full text-left px-5 py-4 rounded-2xl font-medium text-sm">
+                    <i class="fa-solid fa-layer-group w-5 text-center"></i>
+                    Introduction to Project
+                </button>
+                <button onclick="navigate('system-flow')" id="btn-system-flow" class="nav-btn bg-transparent text-slate-600 flex items-center gap-4 w-full text-left px-5 py-4 rounded-2xl font-medium text-sm">
+                    <i class="fa-solid fa-diagram-project w-5 text-center"></i>
+                    System Flow
+                </button>
+                <button onclick="navigate('scenarios')" id="btn-scenarios" class="nav-btn bg-transparent text-slate-600 flex items-center gap-4 w-full text-left px-5 py-4 rounded-2xl font-medium text-sm">
+                    <i class="fa-solid fa-shield-halved w-5 text-center"></i>
+                    Scenario Examples
+                </button>
+                <button onclick="navigate('dashboard')" id="btn-dashboard" class="nav-btn bg-transparent text-slate-600 flex items-center gap-4 w-full text-left px-5 py-4 rounded-2xl font-medium text-sm">
+                    <i class="fa-solid fa-desktop w-5 text-center"></i>
+                    AiRS Web (Dummy)
+                </button>
+                <!-- TAMBAH BUTANG QR DI SINI -->
+                <button onclick="navigate('qr')" id="btn-qr" class="nav-btn bg-transparent text-slate-600 flex items-center gap-4 w-full text-left px-5 py-4 rounded-2xl font-medium text-sm">
+                    <i class="fa-solid fa-qrcode w-5 text-center"></i>
+                    Access Link (QR)
+                </button>
+            </nav>
+
+            <!-- User profile / Group Info -->
+            <div class="mt-auto pt-6 border-t border-slate-200">
+                <div class="flex items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                    <div class="w-10 h-10 rounded-full bg-cisco-light/10 text-cisco-primary flex items-center justify-center">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-700">Group 1</p>
+                        <p class="text-[10px] text-slate-500 font-medium">Isma, Aqil, Zuhairi</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 h-full relative z-0">
+        
+<!-- SECTION 1: INTRODUCTION -->
+        <section id="sec-intro" class="content-section h-full flex flex-col gap-6 animate-slide-up">
+            
+            <div class="glass-panel rounded-3xl p-8 flex items-center justify-between">
+                <div>
+                    <h2 class="text-3xl font-bold text-cisco-primary mb-2 tracking-tight">Project Introduction</h2>
+                    <p class="text-slate-500 font-medium">Automated Incident Response System for Enterprise Infrastructure</p>
+                </div>
+            </div>
+
+            <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0">
+                
+                <!-- Kotak Kiri: Problem Statement -->
+                <div class="glass-panel rounded-3xl p-6 flex flex-col border-t-4 border-t-amber-400">
+                    <h3 class="text-lg font-bold text-slate-800 mb-6 px-2 flex items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Problem Statement
+                    </h3>
+                    
+                    <div class="flex-1 flex flex-col gap-4 overflow-y-auto pr-2">
+                        <!-- Problem 1 -->
+                        <div class="bg-white border border-slate-100 p-5 rounded-2xl shadow-sm">
+                            <h4 class="text-sm font-bold text-cisco-primary mb-2">1. Manual Incident Delay</h4>
+                            <p class="text-xs text-slate-600 leading-relaxed">
+                                Traditional incident response heavily relies on human intervention. The latency between alert reception, logging into the CLI, and manual mitigation leaves a dangerous window of vulnerability.
+                            </p>
+                        </div>
+                        
+                        <!-- Problem 2 -->
+                        <div class="bg-white border border-slate-100 p-5 rounded-2xl shadow-sm">
+                            <h4 class="text-sm font-bold text-cisco-primary mb-2">2. High Cost of Commercial Software</h4>
+                            <p class="text-xs text-slate-600 leading-relaxed">
+                                Commercial enterprise monitoring solutions carry heavy licensing fees, making them inaccessible for SMEs.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kotak Kanan: Poster Projek (Ganti Core Objectives) -->
+                <div class="glass-panel rounded-3xl p-6 flex flex-col shadow-sm border-t-4 border-t-[#003d59] min-h-0">
+                    
+                    <div class="flex items-center justify-between mb-4 shrink-0">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-file-pdf text-red-500 text-xl"></i>
+                            <h3 class="text-xl font-bold text-slate-800 tracking-tight">Project Poster (A3)</h3>
+                        </div>
+                        <a href="AiRS-Poster-Printing-A3 (Baharu).pdf" target="_blank" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition-colors border border-slate-200 flex items-center gap-2">
+                            <i class="fa-solid fa-up-right-from-square"></i> Open Full
+                        </a>
+                    </div>
+                    
+                    <!-- Paparan Gambar Poster (Fit Terus Tanpa Potong) -->
+                    <div class="flex-1 bg-slate-100 rounded-xl border border-slate-200 flex items-center justify-center p-2 overflow-hidden min-h-0">
+                        <img src="poster.png" alt="AiRS Project Poster" class="max-w-full max-h-full object-contain rounded-md shadow-sm">
+                    </div>
+                    
+                </div>
+        </section>
+
+<!-- SECTION 2: SYSTEM FLOW (NEW TOPOLOGY + DETAILED FLOWCHART) -->
+        <section id="sec-system-flow" class="content-section h-full flex flex-col gap-6 hidden animate-slide-up">
+            
+            <!-- Header -->
+            <div class="glass-panel rounded-3xl p-6 flex items-center justify-between">
+                <div>
+                    <h2 class="text-3xl font-bold text-cisco-primary mb-2 tracking-tight">Architecture & System Flow</h2>
+                    <p class="text-slate-500 font-medium">Infrastructure overview and automated remediation process</p>
+                </div>
+            </div>
+
+            <!-- Content Grid -->
+            <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0">
+                
+                <!-- KOTAK 1: CODED NETWORK TOPOLOGY (OVERVIEW) -->
+                <div class="glass-panel rounded-3xl p-6 flex flex-col border-t-4 border-t-cisco-primary">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 px-2">1. Topology</h3>
+                    <div class="flex-1 bg-slate-50 rounded-2xl relative overflow-hidden flex items-center justify-center p-6 border border-slate-200">
+                        
+                        <!-- Wrapper Topologi -->
+                        <div class="flex-1 relative w-full h-full min-h-[300px]">
+                            <!-- KABEL (SVG Lines) -->
+                            <svg class="absolute inset-0 w-full h-full z-0" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                <line x1="15" y1="50" x2="35" y2="35" style="stroke: #ef4444; stroke-width: 1.5; stroke-dasharray: 4; animation: flow-packet 1s linear infinite;" />
+                                <line x1="15" y1="80" x2="35" y2="65" class="cable" style="stroke: #cbd5e1;" />
+                                <line x1="35" y1="35" x2="55" y2="50" style="stroke: #f59e0b; stroke-width: 1.5; stroke-dasharray: 4; animation: flow-packet 1s linear infinite;" />
+                                <line x1="35" y1="65" x2="55" y2="50" class="cable" style="stroke: #cbd5e1;" />
+                                <line x1="55" y1="50" x2="72" y2="50" style="stroke: #f59e0b; stroke-width: 1.5; stroke-dasharray: 4; animation: flow-packet 1s linear infinite;" />
+                                <line x1="72" y1="50" x2="85" y2="25" class="cable cable-dotted" />
+                                <line x1="72" y1="50" x2="85" y2="75" class="cable cable-dotted" />
+                            </svg>
+
+                            <!-- NODES -->
+                            <div class="topo-node" style="top: 50%; left: 15%;">
+                                <div class="icon-box border-red-500 bg-red-50"><i class="fa-solid fa-user-secret text-red-600"></i></div>
+                                <span>Rogue-Client</span>
+                            </div>
+                            <div class="topo-node" style="top: 80%; left: 15%;">
+                                <div class="icon-box"><i class="fa-solid fa-desktop text-slate-700"></i></div>
+                                <span>Client-2</span>
+                            </div>
+                            <div class="topo-node" style="top: 35%; left: 35%;">
+                                <div class="icon-box bg-slate-200"><i class="fa-solid fa-network-wired text-slate-800"></i></div>
+                                <span>Switch-1</span>
+                                <div class="port-indicator bg-red-500 animate-ping" style="left: -5px; bottom: 15px;"></div>
+                            </div>
+                            <div class="topo-node" style="top: 65%; left: 35%;">
+                                <div class="icon-box bg-slate-200"><i class="fa-solid fa-network-wired text-slate-800"></i></div>
+                                <span>Switch-2</span>
+                                <div class="port-indicator bg-emerald-500" style="left: -5px; bottom: 15px;"></div>
+                            </div>
+                            <div class="topo-node" style="top: 50%; left: 55%;">
+                                <div class="icon-box bg-slate-800 rounded-full text-white"><i class="fa-solid fa-arrows-to-circle text-xl"></i></div>
+                                <span>Router</span>
+                            </div>
+                            <div class="topo-node" style="top: 50%; left: 72%;">
+                                <div class="icon-box"><i class="fa-solid fa-server text-blue-600"></i></div>
+                                <span>AiRS Server</span>
+                            </div>
+                            <div class="topo-node" style="top: 25%; left: 85%;">
+                                <div class="icon-box border-none shadow-none text-4xl"><i class="fa-solid fa-user-tie text-slate-800"></i></div>
+                                <span>Admin</span>
+                            </div>
+                            <div class="topo-node" style="top: 75%; left: 85%;">
+                                <div class="bg-white border-2 border-slate-800 rounded p-2 flex gap-2 shadow-lg relative">
+                                    <i class="fa-solid fa-globe text-slate-600 text-xl"></i>
+                                    <i class="fa-brands fa-discord text-[#5865F2] text-xl"></i>
+                                    <div class="absolute -top-2 -left-2 w-4 h-4 bg-red-500 rounded-full border border-white animate-pulse"></div>
+                                </div>
+                                <span class="mt-2">Monitoring</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- KOTAK 2: CODED SYSTEM PROCESS FLOW -->
+                <div class="glass-panel rounded-3xl p-6 flex flex-col border-t-4 border-t-cisco-light relative overflow-hidden">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 px-2">2. System Flowchart</h3>
+                    
+                    <!-- Scrollable Container -->
+                    <div class="flex-1 overflow-y-auto pr-3 space-y-4 pb-4">
+
+                        <!-- Phase 1 -->
+                        <div class="bg-white border border-red-200 rounded-xl p-4 shadow-sm">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-6 h-6 bg-red-100 border-2 border-red-500 text-red-600 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0">1</div>
+                                <h4 class="text-xs font-bold text-red-600 uppercase tracking-wider m-0">Rogue Attack & Switch Enforcement</h4>
+                            </div>
+                            <div class="bg-red-50 p-2.5 rounded-lg border border-red-100 text-[11px] text-slate-700 leading-relaxed ml-9">
+                                <p><strong>Trigger:</strong> Unknown/Rogue device plugged in.</p>
+                                <p class="mt-1"><strong>Action:</strong> MAC limit exceeded (>1). Port is set to <code class="text-red-600 bg-white px-1.5 py-0.5 rounded border border-red-100">err-disabled shutdown</code>.</p>
+                                <p class="mt-1"><strong>Log Generated:</strong> Abnormal Syslog <code class="text-slate-700 bg-white px-1.5 py-0.5 rounded font-mono">%PORT_SECURITY Violation</code>.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-center"><i class="fa-solid fa-arrow-down text-slate-300"></i></div>
+
+                        <!-- Phase 2 -->
+                        <div class="bg-white border border-amber-200 rounded-xl p-4 shadow-sm">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-6 h-6 bg-amber-100 border-2 border-amber-500 text-amber-600 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0">2</div>
+                                <h4 class="text-xs font-bold text-amber-600 uppercase tracking-wider m-0">AiRS Ingestion</h4>
+                            </div>
+                            <div class="bg-amber-50 p-2.5 rounded-lg border border-amber-100 text-[11px] text-slate-700 leading-relaxed ml-9">
+                                <p><strong>Transmission:</strong> Switch sends UDP Syslog Alert Payload on Mgmt VLAN 100. Router forwards the alert.</p>
+                                <p class="mt-1"><strong>Processing:</strong> <code class="text-amber-700 font-bold bg-white px-1.5 py-0.5 rounded border border-amber-100">engine.py</code> receives the payload.</p>
+                                <p class="mt-1"><strong>Extraction:</strong> Switch IP | Interface ID | Rogue MAC Address.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-center"><i class="fa-solid fa-arrow-down text-slate-300"></i></div>
+
+                        <!-- Phase 3 -->
+                        <div class="bg-white border border-[#5865F2]/30 rounded-xl p-4 shadow-sm">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-6 h-6 bg-[#5865F2]/10 border-2 border-[#5865F2] text-[#5865F2] rounded-full flex items-center justify-center text-[10px] font-bold shrink-0">3</div>
+                                <h4 class="text-xs font-bold text-[#5865F2] uppercase tracking-wider m-0">Alert & Monitoring</h4>
+                            </div>
+                            <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-[11px] text-slate-700 leading-relaxed ml-9">
+                                <p><strong>Database:</strong> Server parses and stores record in web dashboard local database, updating History Logs.</p>
+                                <p class="mt-1"><strong>Notification:</strong> Triggers Real-Time Discord Webhook & Dashboard Alerts.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-center"><i class="fa-solid fa-arrow-down text-slate-300"></i></div>
+
+                        <!-- Phase 4 -->
+                        <div class="bg-white border border-emerald-200 rounded-xl p-4 shadow-sm">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-6 h-6 bg-emerald-100 border-2 border-emerald-500 text-emerald-600 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0">4</div>
+                                <h4 class="text-xs font-bold text-emerald-600 uppercase tracking-wider m-0">Action & Remediation</h4>
+                            </div>
+                            <div class="bg-emerald-50 p-2.5 rounded-lg border border-emerald-100 text-[11px] text-slate-700 leading-relaxed ml-9">
+                                <p><strong>Decision:</strong> Admin reviews alert on Web Dashboard or Discord.</p>
+                                <p class="mt-1"><strong>Action:</strong> Admin clicks the <code class="text-white bg-emerald-600 px-1.5 py-0.5 rounded">RE-ENABLE PORT</code> button.</p>
+                                <p class="mt-1"><strong>Automation:</strong> Backend engine initiates automated SSH session. Executes <code class="text-slate-700 bg-white px-1.5 py-0.5 rounded">shutdown</code> followed by <code class="text-slate-700 bg-white px-1.5 py-0.5 rounded">no shutdown</code>.</p>
+                                <p class="mt-1 font-bold text-emerald-700">Result: Physical Port Restored & Status Marked 'RECOVERED'.</p>
+                            </div>
+                        </div>
+
+                        <!-- Bottom Note (Unrestricted Lab Quote) -->
+                        <div class="mt-6 bg-slate-800 text-slate-300 p-4 rounded-xl text-[10px] leading-relaxed border-l-4 border-blue-500 italic shadow-inner">
+                            <p>"Even if an attacker connects freely in an unrestricted lab area (Scenario B2), the moment they attempt lateral movement toward restricted core devices or secured ports (Scenario A/B1), the Cisco switch instantly locks the target interface into an err-disabled state.</p>
+                            <p class="mt-2">AiRS immediately flags their MAC address, logs the incident... and dispatches a real-time Discord alert—keeping the port safely isolated until the administrator manually clicks the [Re-Enable Port] button."</p>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 3: SCENARIO EXAMPLES (INTERACTIVE TOPOLOGY) -->
+        <section id="sec-scenarios" class="content-section h-full flex flex-col gap-6 hidden animate-slide-up">
+            <!-- Header & Tabs -->
+            <div class="glass-panel rounded-3xl p-6 flex items-center justify-between z-20">
+                <div>
+                    <h2 class="text-2xl font-bold text-cisco-primary tracking-tight">Scenario Demonstration</h2>
+                </div>
+                
+                <div class="flex gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200" id="scenario-tabs">
+                    <button onclick="goToScenario(1)" id="tab-1" class="scenario-tab active px-6 py-2 rounded-lg text-sm font-semibold bg-white text-cisco-primary shadow-sm transition-all">
+                        S1: Restrict-Lab
+                    </button>
+                    <button onclick="goToScenario(2)" id="tab-2" class="scenario-tab px-6 py-2 rounded-lg text-sm font-semibold text-slate-500 hover:text-slate-800 bg-transparent transition-all">
+                        S2: Non-Restricted-Lab
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="flex-1 glass-panel rounded-3xl p-6 flex flex-col min-h-0 relative z-10">
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 h-full">
+                    
+                    <!-- ========================================== -->
+                    <!-- BAHAGIAN KIRI (Teks Penerangan) -->
+                    <!-- ========================================== -->
+                    <div id="scenario-text-col" class="col-span-1 lg:col-span-2 flex flex-col justify-center px-4 relative transition-all duration-300">                        
+                        <!-- SCENARIO 1 (7 Slides) -->
+                        <div id="text-s1-slide1" class="scenario-text transition-opacity duration-300">
+                            <h3 class="text-2xl font-bold text-slate-800 mb-4">1. Normal Operation</h3>
+                            <p class="text-slate-600 text-base leading-relaxed">Normal Client Ping (Use Network Normally) without an error.</p>
+                        </div>
+                        <div id="text-s1-slide2" class="scenario-text hidden transition-opacity duration-300">
+                            <h3 class="text-2xl font-bold text-slate-800 mb-4">2. The Intrusion</h3>
+                            <p class="text-slate-600 text-base leading-relaxed">Rogue Client comes in, detaches the Normal Client Cable, and attaches to theirs.</p>
+                        </div>
+                        <div id="text-s1-slide3" class="scenario-text hidden transition-opacity duration-300">
+                            <h3 class="text-2xl font-bold text-red-600 mb-4">3. Security Violation</h3>
+                            <p class="text-slate-600 text-base leading-relaxed">Rogue Client Pings and gets an error which causes MAC violation. The port turns into err-disable (shutdown) since the lab uses a switch with a maximum mac-address of 1.</p>
+                        </div>
+                        <div id="text-s1-slide4" class="scenario-text hidden transition-opacity duration-300">
+                            <h3 class="text-2xl font-bold text-amber-500 mb-4">4. Syslog Generation</h3>
+                            <p class="text-slate-600 text-base leading-relaxed">Switch generates Syslog and passes it to the router. The server captures it and logs it to the web dashboard & Discord webhook.</p>
+                        </div>
+                        <div id="text-s1-slide5" class="scenario-text hidden transition-opacity duration-300">
+                            <h3 class="text-2xl font-bold text-slate-800 mb-4">5. Rogue Escapes</h3>
+                            <p class="text-slate-600 text-base leading-relaxed">Rogue Client detaches their cable, attaches it back to the Normal Client, and goes away.</p>
+                        </div>
+                        <div id="text-s1-slide6" class="scenario-text hidden transition-opacity duration-300">
+                            <h3 class="text-2xl font-bold text-blue-600 mb-4">6. Admin Remediation</h3>
+                            <p class="text-slate-600 text-base leading-relaxed">Admin is notified by the violation via Discord, directly opens the web dashboard, and re-enables the port by clicking a single "re-enable" button via SSH.</p>
+                        </div>
+                        <div id="text-s1-slide7" class="scenario-text hidden transition-opacity duration-300">
+                            <h3 class="text-2xl font-bold text-emerald-600 mb-4">7. Network Restored</h3>
+                            <p class="text-slate-600 text-base leading-relaxed">Normal Client comes back to use the network normally with the ports re-enabled and not shutdown.</p>
+                        </div>
+
+                        <!-- SCENARIO 2 (3 Slides) -->
+                        <div id="text-s2-slide1" class="scenario-text hidden transition-opacity duration-300">
+                            <h3 class="text-2xl font-bold text-slate-800 mb-4">1. Normal Operation</h3>
+                            <p class="text-slate-600 text-base leading-relaxed">Normal Client Ping (Use Network Normally) without an error.</p>
+                        </div>
+                        <div id="text-s2-slide2" class="scenario-text hidden transition-opacity duration-300">
+                            <h3 class="text-2xl font-bold text-slate-800 mb-4">2. Security Decision</h3>
+                            <p class="text-slate-600 text-base leading-relaxed">The Admin wants to shutdown the specific ports in that lab for security reasons/purposes.</p>
+                        </div>
+                        <div id="text-s2-slide3" class="scenario-text hidden transition-opacity duration-300">
+                            <h3 class="text-2xl font-bold text-blue-600 mb-4">3. Manual Override</h3>
+                            <p class="text-slate-600 text-base leading-relaxed">Admin opens the Web Dashboard, selects the ports he wants to shutdown, and clicks the shutdown button.</p>
+                        </div>
+
+                    </div>
+
+                    <!-- ========================================== -->
+                    <!-- BAHAGIAN KANAN (Unified Interactive Topology) -->
+                    <!-- ========================================== -->
+                        <div id="scenario-topo-col" class="col-span-1 lg:col-span-3 bg-slate-50 rounded-2xl border border-slate-200 shadow-sm flex flex-col relative overflow-hidden min-h-[400px] transition-all duration-300">                        
+                        <!-- Butang Expand -->
+                        <button onclick="toggleTopology()" id="btn-expand-topo" class="absolute top-4 right-4 z-50 bg-white border border-slate-200 shadow-sm text-slate-600 hover:text-cisco-primary p-2.5 rounded-xl transition-all">
+                            <i class="fa-solid fa-expand"></i>
+                        </button>
+                        
+                        <!-- Wrapper Topologi Utama -->
+                        <div id="topology-container" class="flex-1 relative w-full h-full" data-state="s1-1">
+                            
+                            <!-- KABEL (SVG Lines) -->
+                            <svg class="absolute inset-0 w-full h-full z-0" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                <!-- C1 to SW1 -->
+                                <line id="line-c1" x1="15" y1="20" x2="35" y2="35" class="cable" />
+                                <!-- Rogue to SW1 -->
+                                <line id="line-rogue" x1="15" y1="50" x2="35" y2="35" class="cable" />
+                                <!-- C2 to SW2 -->
+                                <line id="line-c2" x1="15" y1="80" x2="35" y2="65" class="cable" />
+                                
+                                <!-- Switches to Router -->
+                                <line id="line-sw1-rt" x1="35" y1="35" x2="55" y2="50" class="cable" />
+                                <line id="line-sw2-rt" x1="35" y1="65" x2="55" y2="50" class="cable" />
+                                
+                                <!-- Router to Server -->
+                                <line id="line-rt-srv" x1="55" y1="50" x2="72" y2="50" class="cable" />
+                                
+                                <!-- Server to Admin & Monitoring -->
+                                <line id="line-srv-adm" x1="72" y1="50" x2="85" y2="25" class="cable cable-dotted" />
+                                <line id="line-srv-mon" x1="72" y1="50" x2="85" y2="75" class="cable cable-dotted" />
+
+                                <!-- SSH Remediation Curves (Admin to Switches) -->
+                                <path id="line-ssh1" d="M 85 25 Q 60 -10 35 35" class="cable-ssh" fill="none" style="animation-direction: reverse;" />
+                                <path id="line-ssh2" d="M 85 25 Q 70 80 35 65" class="cable-ssh" fill="none" style="animation-direction: reverse;" /> 
+                        </svg>
+
+                            <!-- NODES (Ikon Peralatan) -->
+                            <!-- Client 1 -->
+                            <div id="node-c1" class="topo-node" style="top: 20%; left: 15%;">
+                                <div class="icon-box"><i class="fa-solid fa-desktop text-slate-700"></i></div>
+                                <span>Client-1</span>
+                            </div>
+
+                            <!-- Rogue Client -->
+                            <div id="node-rogue" class="topo-node" style="top: 50%; left: 15%;">
+                                <div class="icon-box border-red-500 bg-red-50"><i class="fa-solid fa-user-secret text-red-600"></i></div>
+                                <span>Rogue-Client</span>
+                            </div>
+
+                            <!-- Client 2 -->
+                            <div id="node-c2" class="topo-node" style="top: 80%; left: 15%;">
+                                <div class="icon-box"><i class="fa-solid fa-desktop text-slate-700"></i></div>
+                                <span>Client-2</span>
+                            </div>
+
+                            <!-- Switch 1 -->
+                            <div id="node-sw1" class="topo-node" style="top: 35%; left: 35%;">
+                                <div class="icon-box bg-slate-200"><i class="fa-solid fa-network-wired text-slate-800"></i></div>
+                                <span>Switch-1</span>
+                                <div id="port-sw1" class="port-indicator bg-emerald-500"></div>
+                            </div>
+
+                            <!-- Switch 2 -->
+                            <div id="node-sw2" class="topo-node" style="top: 65%; left: 35%;">
+                                <div class="icon-box bg-slate-200"><i class="fa-solid fa-network-wired text-slate-800"></i></div>
+                                <span>Switch-2</span>
+                                <div id="port-sw2" class="port-indicator bg-emerald-500"></div>
+                            </div>
+
+                            <!-- Router -->
+                            <div id="node-rt" class="topo-node" style="top: 50%; left: 55%;">
+                                <div class="icon-box bg-slate-800 rounded-full text-white"><i class="fa-solid fa-arrows-to-circle text-xl"></i></div>
+                                <span>Router</span>
+                            </div>
+
+                            <!-- Server (AiRS) -->
+                            <div id="node-srv" class="topo-node" style="top: 50%; left: 72%;">
+                                <div class="icon-box"><i class="fa-solid fa-server text-blue-600"></i></div>
+                                <span>AiRS Server</span>
+                            </div>
+
+                            <!-- Admin -->
+                            <div id="admin-node" class="topo-node" style="top: 25%; left: 85%;">
+                                <div class="icon-box border-none shadow-none text-4xl"><i class="fa-solid fa-user-tie text-slate-800"></i></div>
+                                <span>Admin</span>
+                            </div>
+
+                            <!-- Monitoring (Web/Discord) -->
+                            <div id="node-mon" class="topo-node" style="top: 75%; left: 85%;">
+                                <div class="bg-white border-2 border-slate-800 rounded p-2 flex gap-2 shadow-lg relative">
+                                    <i class="fa-solid fa-globe text-slate-600 text-xl"></i>
+                                    <i class="fa-brands fa-discord text-[#5865F2] text-xl"></i>
+                                    <div id="alert-badge" class="absolute -top-2 -left-2 w-4 h-4 bg-red-500 rounded-full border border-white hidden animate-ping"></div>
+                                </div>
+                                <span class="mt-2">Monitoring</span>
+                            </div>
+
+                        </div>
+
+                        <!-- Bottom Navigation Controls -->
+                        <div class="flex justify-between items-center border-t border-slate-200 bg-white p-4 z-10">
+                            <button onclick="prevSlide()" id="btn-prev" disabled class="px-5 py-2 rounded-lg text-sm font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 disabled:opacity-30 transition-all">
+                                <i class="fa-solid fa-chevron-left"></i> PREV
+                            </button>
+                            <span class="text-xs font-bold text-slate-400 tracking-widest" id="slide-indicator">SLIDE 1 OF 7</span>
+                            <button onclick="nextSlide()" id="btn-next" class="px-5 py-2 rounded-lg text-sm font-bold text-white bg-cisco-primary hover:bg-[#003d59] shadow-sm transition-all">
+                                NEXT <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+
+        <!-- SECTION 4: AiRS WEB (DUMMY DASHBOARD DENGAN SIDEBAR) -->
+        <section id="sec-dashboard" class="content-section h-full flex flex-col gap-0 hidden animate-slide-up">
+            
+            <!-- Mock Browser Window Frame (Mac Style) -->
+            <div class="bg-white border border-slate-200 border-b-0 rounded-t-2xl p-3 flex items-center gap-4 shadow-sm z-10 relative">
+                <!-- Mac style buttons -->
+                <div class="flex gap-2 pl-2">
+                    <div class="w-3.5 h-3.5 rounded-full bg-red-400 border border-red-500/20"></div>
+                    <div class="w-3.5 h-3.5 rounded-full bg-amber-400 border border-amber-500/20"></div>
+                    <div class="w-3.5 h-3.5 rounded-full bg-emerald-400 border border-emerald-500/20"></div>
+                </div>
+                <!-- URL Bar -->
+                <div class="bg-slate-100 text-slate-500 text-xs font-mono py-2 px-6 rounded-lg flex-1 text-center border border-slate-200 shadow-inner max-w-2xl mx-auto flex items-center justify-center gap-2" id="browser-url">
+                    <i class="fa-solid fa-lock text-slate-400"></i> 127.0.0.1:5000 / dashboard
+                </div>
+                <div class="w-16"></div> 
+            </div>
+
+            <!-- Mini Website Body (Sidebar + iFrame) -->
+            <div class="glass-panel bg-white rounded-b-2xl rounded-t-none flex-1 flex flex-col lg:flex-row shadow-lg border-t-0 overflow-hidden relative">
+                
+<!-- Sidebar (Tukar jadi mendatar untuk mobile) -->
+                <div class="w-full lg:w-64 bg-white border-b lg:border-b-0 lg:border-r border-slate-200 flex flex-col z-10 flex-shrink-0">
+                    
+                    <div class="p-4 lg:p-6 lg:pb-4 flex items-center justify-between shrink-0">
+                        <h1 class="text-xl lg:text-2xl font-bold text-blue-600 tracking-wider">AiRS</h1>
+                        <!-- Butang Logout Kecil (Hanya muncul di Mobile) -->
+                        <button onclick="changeIframePage('indexdummy.html', 'dashboard', this)" class="lg:hidden text-[10px] font-bold text-red-600 px-3 py-1.5 bg-red-50 hover:bg-red-100 rounded-lg border border-red-100">
+                            Logout
+                        </button>
+                    </div>
+                    
+                    <!-- Menu: Horizontal scroll di mobile, Vertical di desktop -->
+                    <nav class="flex flex-row lg:flex-col gap-2 shrink-0 lg:flex-1 px-4 pb-3 lg:py-2 overflow-x-auto lg:overflow-y-auto custom-scrollbar items-center lg:items-stretch">
+                        <button onclick="changeIframePage('indexdummy.html', 'dashboard', this)" class="dummy-nav-btn shrink-0 flex items-center gap-3 px-4 py-2 lg:py-3 rounded-lg text-sm font-medium bg-blue-50 text-blue-600 transition-colors">
+                            Dashboard
+                        </button>
+                        <button onclick="changeIframePage('incidents.html', 'incidents', this)" class="dummy-nav-btn shrink-0 flex items-center gap-3 px-4 py-2 lg:py-3 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                            Incidents
+                        </button>
+                        <button onclick="changeIframePage('devices.html', 'devices', this)" class="dummy-nav-btn shrink-0 flex items-center gap-3 px-4 py-2 lg:py-3 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                            Devices
+                        </button>
+                        <button onclick="changeIframePage('logs.html', 'logs', this)" class="dummy-nav-btn shrink-0 flex items-center gap-3 px-4 py-2 lg:py-3 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                            Logs
+                        </button>
+                        <button onclick="changeIframePage('register.html', 'register', this)" class="dummy-nav-btn shrink-0 flex items-center gap-3 px-4 py-2 lg:py-3 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                            Register
+                        </button>
+                        <button onclick="changeIframePage('settings.html', 'settings', this)" class="dummy-nav-btn shrink-0 flex items-center gap-3 px-4 py-2 lg:py-3 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                            Settings
+                        </button>
+                    </nav>
+
+                    <!-- Butang Logout Besar (Hanya muncul di Desktop) -->
+                    <div class="hidden lg:block p-4 pt-2 shrink-0">
+                        <button onclick="changeIframePage('indexdummy.html', 'dashboard', this)" class="w-full py-3 rounded-xl text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors border border-red-100">
+                            Logout
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Kontainer iFrame -->
+                <div class="flex-1 bg-slate-50 relative min-h-[600px] lg:min-h-0">
+                    <!-- Muat indexdummy.html -->
+                    <iframe id="airs-iframe" src="indexdummy.html" class="w-full h-full border-none absolute inset-0 bg-slate-50" title="AiRS Main Website"></iframe>
+                </div>
+                
+            </div>
+        </section>
+
+        <!-- SECTION 5: QR CODE -->
+        <section id="sec-qr" class="content-section h-full flex flex-col gap-6 hidden animate-slide-up">
+            <div class="glass-panel rounded-3xl p-8 flex items-center justify-between">
+                <div>
+                    <h2 class="text-3xl font-bold text-cisco-primary mb-2 tracking-tight">Project Access QR</h2>
+                    <p class="text-slate-500 font-medium">Scan to open the live website on your device</p>
+                </div>
+            </div>
+            <div class="flex-1 glass-panel rounded-3xl p-6 flex items-center justify-center min-h-0">
+                <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 flex flex-col items-center gap-6">
+                    <!-- TUKAR qr.png KE NAMA FAIL GAMBAR AWAK -->
+                    <img src="qr.png" alt="QR Code" class="w-80 h-80 object-contain rounded-xl shadow-inner border border-slate-100 p-4">
+                    <p class="text-slate-500 font-medium font-mono text-sm tracking-widest bg-slate-50 px-4 py-2 rounded-lg border border-slate-200">izuhairi.github.io/AiRS</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- External JS -->
+    <script src="script.js"></script>
+</body>
+</html>
